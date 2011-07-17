@@ -1,0 +1,9 @@
+GUPnP Audio Renderer
+====================
+
+* 2Player on Android does not recognize a MediaRenderer in Version 2, only
+  Version 1 is found.
+
+UBICOM DLNA WiFi Speakers:
+http://www.ubicom.com/applications/dlnaspeakers.php
+

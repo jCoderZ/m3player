@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <!-- URLBase>http://localhost</URLBase -->
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaRenderer:2</deviceType>
+    <friendlyName>GUPnP Audio Renderer</friendlyName>
+    <manufacturer>Michael Rumpf</manufacturer>
+    <modelName>model name</modelName>
+    <UDN>uuid:a2b641be-9543-11e0-bd20-001966f2c8ac</UDN>
+    <!--
+    <manufacturerURL>http://michael.rumpfonline.de</manufacturerURL>
+    <modelDescription></modelDescription>
+    <modelNumber>V1.0</modelNumber>
+    <modelURL>URL to model site</modelURL>
+    <serialNumber>1234567890</serialNumber>
+    <UPC>Universal Product Code</UPC>
+    <iconList>
+    <icon>
+      <mimetype>image/format</mimetype>
+      <width>horizontal pixels</width>
+      <height>vertical pixels</height>
+      <depth>color depth</depth>
+      <url>URL to icon</url>
+    </icon>
+    </iconList -->
+    <serviceList>
+    <service>
+      <serviceType>urn:schemas-upnp-org:service:RenderingControl:2</serviceType>
+      <serviceId>urn:upnp-org:serviceId:RenderingControl:2</serviceId>
+      <SCPDURL>/RenderingControl/description2.xml</SCPDURL>
+      <controlURL>/RenderingControl/Control</controlURL>
+      <eventSubURL>/RenderingControl/Event</eventSubURL>
+    </service>
+    <service>
+      <serviceType>urn:schemas-upnp-org:service:ConnectionManager:2</serviceType>
+      <serviceId>urn:upnp-org:serviceId:ConnectionManager:2</serviceId>
+      <SCPDURL>/ConnectionManager/description2.xml</SCPDURL>
+      <controlURL>/ConnectionManager/Control</controlURL>
+      <eventSubURL>/ConnectionManager/Event</eventSubURL>
+    </service>
+    <service>
+      <serviceType>urn:schemas-upnp-org:service:AVTransport:2</serviceType>
+      <serviceId>urn:upnp-org:serviceId:AVTransport:2</serviceId>
+      <SCPDURL>/AVTransport/description2.xml</SCPDURL>
+      <controlURL>/AVTransport/Control</controlURL>
+      <eventSubURL>/AVTransport/Event</eventSubURL>
+    </service>
+    </serviceList>
+    <deviceList></deviceList>
+    <!-- presentationURL>URL for presentation</presentationURL -->
+  </device>
+</root>
