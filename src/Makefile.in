@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = audio-renderer$(EXEEXT)
+noinst_PROGRAMS = m3ddity-player$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -49,18 +49,18 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_audio_renderer_OBJECTS = avtransport.$(OBJEXT) \
+am_m3ddity_player_OBJECTS = avtransport.$(OBJEXT) \
 	renderingcontrol.$(OBJEXT) connectionmanager.$(OBJEXT) \
-	audio-renderer.$(OBJEXT) presets.$(OBJEXT) gstreamer.$(OBJEXT) \
+	m3ddity-player.$(OBJEXT) presets.$(OBJEXT) gstreamer.$(OBJEXT) \
 	last_change.$(OBJEXT)
-audio_renderer_OBJECTS = $(am_audio_renderer_OBJECTS)
-audio_renderer_LDADD = $(LDADD)
+m3ddity_player_OBJECTS = $(am_m3ddity_player_OBJECTS)
+m3ddity_player_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
-audio_renderer_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+m3ddity_player_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(audio_renderer_LDFLAGS) $(LDFLAGS) -o \
+	$(AM_CFLAGS) $(CFLAGS) $(m3ddity_player_LDFLAGS) $(LDFLAGS) -o \
 	$@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -88,8 +88,8 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(audio_renderer_SOURCES)
-DIST_SOURCES = $(audio_renderer_SOURCES)
+SOURCES = $(m3ddity_player_SOURCES)
+DIST_SOURCES = $(m3ddity_player_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -220,11 +220,11 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = -I$(top_srcdir) $(GTHREAD_CFLAGS) $(LIBGUPNP_CFLAGS) $(LIBGUPNPAV_CFLAGS) $(GST_CFLAGS)
-audio_renderer_SOURCES = avtransport.c renderingcontrol.c connectionmanager.c audio-renderer.c \
+m3ddity_player_SOURCES = avtransport.c renderingcontrol.c connectionmanager.c m3ddity-player.c \
 	presets.c  presets.h  gstreamer.c  gstreamer.h  last_change.c\
 	last_change.h
 
-audio_renderer_LDFLAGS = -export-dynamic $(GTHREAD_LIBS) $(LIBGUPNP_LIBS) $(LIBGUPNPAV_LIBS) $(GST_LIBS)
+m3ddity_player_LDFLAGS = -export-dynamic $(GTHREAD_LIBS) $(LIBGUPNP_LIBS) $(LIBGUPNPAV_LIBS) $(GST_LIBS)
 EXTRA_DIST = description1.xml description2.xml \
 	     AVTransport/description1.xml AVTransport/description2.xml \
 	     ConnectionManager/description1.xml ConnectionManager/description2.xml \
@@ -276,9 +276,9 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-audio-renderer$(EXEEXT): $(audio_renderer_OBJECTS) $(audio_renderer_DEPENDENCIES) 
-	@rm -f audio-renderer$(EXEEXT)
-	$(AM_V_CCLD)$(audio_renderer_LINK) $(audio_renderer_OBJECTS) $(audio_renderer_LDADD) $(LIBS)
+m3ddity-player$(EXEEXT): $(m3ddity_player_OBJECTS) $(m3ddity_player_DEPENDENCIES) 
+	@rm -f m3ddity-player$(EXEEXT)
+	$(AM_V_CCLD)$(m3ddity_player_LINK) $(m3ddity_player_OBJECTS) $(m3ddity_player_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -286,11 +286,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/audio-renderer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/avtransport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connectionmanager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gstreamer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/last_change.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m3ddity-player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/presets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/renderingcontrol.Po@am__quote@
 
