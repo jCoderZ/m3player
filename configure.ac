@@ -1,7 +1,7 @@
 AC_PREREQ(2.53)
-AC_INIT(gupnp-audio-renderer, 0.1, http://www.gupnp.org/)
+AC_INIT(m3ddity-player, 0.1.1, http://www.jcoderz.org/m3dditiez/wiki/m3ddity-player/)
 AM_INIT_AUTOMAKE()
-AC_CONFIG_SRCDIR(src/audio-renderer.c)
+AC_CONFIG_SRCDIR(src/m3ddity-player.c)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_CANONICAL_HOST

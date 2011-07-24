@@ -45,7 +45,7 @@ write_pid_file ()
     FILE *file;
     pid_t pid;
     pid = getpid ();
-    file = fopen ("/var/run/audio-renderer.pid","w");
+    file = fopen ("/var/run/m3ddity-player.pid","w");
     if (file)
     {
         fprintf (file,"%d", pid);
