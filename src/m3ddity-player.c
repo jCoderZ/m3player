@@ -16,6 +16,7 @@
  */
 
 #include <gst/gst.h>
+#include <unistd.h>
 
 #include "renderingcontrol.h"
 #include "connectionmanager.h"
