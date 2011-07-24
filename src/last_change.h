@@ -30,7 +30,7 @@ GString*
 last_change_append_gstring (GString *last_change, const gchar *key, GString *value);
 
 GString*
-last_change_append_int (GString *last_change, const gchar *key, gint64 value);
+last_change_append_int (GString *last_change, const gchar *key, long int value);
 
 gchar*
 last_change_free (GString *last_change);
