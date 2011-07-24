@@ -1,6 +1,6 @@
 AM_CFLAGS = -I$(top_srcdir) $(GTHREAD_CFLAGS) $(LIBGUPNP_CFLAGS) $(LIBGUPNPAV_CFLAGS) $(GST_CFLAGS)
 
-noinst_PROGRAMS = m3ddity-player
+bin_PROGRAMS = m3ddity-player
 
 #BUILT_SOURCES = avtransport.gen.c renderingcontrol.gen.c connectionmanager.gen.c
 avtransport.$(OBJEXT): avtransport.gen.c avtransport.c
