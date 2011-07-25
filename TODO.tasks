@@ -30,12 +30,20 @@
     </item>
     <item>
       <summary>Checkk Memory Management</summary>
-      <comment>I'm currently unsure whether all memory resources are correctly 
-      freed again.</comment>
+      <comment>I'm not sure whether all memory resources are 
+      freed-up again.</comment>
     </item>
     <item>
       <summary>Control volume via mixer device</summary>
       <comment>http://www.oreilly.de/catalog/multilinux/excerpt/ch14-07.htm</comment>
+    </item>
+    <item>
+      <summary>Create wathdog script</summary>
+      <comment></comment>
+    </item>
+    <item>
+      <summary>Add buttons script for preset switching</summary>
+      <comment>A buttons script must be added to send a signal which switches preset channels</comment>
     </item>
   </category>
 </gtodo>
