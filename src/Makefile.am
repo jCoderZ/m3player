@@ -1,7 +1,9 @@
 bin_PROGRAMS = m3player
 
 m3player_SOURCES = avtransport.c renderingcontrol.c connectionmanager.c m3player.c presets.c gstreamer.c last_change.c
+
 BUILT_SOURCES = avtransport.gen.c renderingcontrol.gen.c connectionmanager.gen.c
+
 m3player_CFLAGS = -I$(top_srcdir) $(GTHREAD_CFLAGS) $(LIBGUPNP_CFLAGS) $(LIBGUPNPAV_CFLAGS) $(GST_CFLAGS)
 m3player_LDFLAGS = -export-dynamic $(GTHREAD_LIBS) $(LIBGUPNP_LIBS) $(LIBGUPNPAV_LIBS) $(GST_LIBS)
 
@@ -14,12 +16,18 @@ renderingcontrol.gen.c: RenderingControlV1.xml
 connectionmanager.gen.c: ConnectionManagerV1.xml 
 		gupnp-binding-tool --prefix connectionmanager --mode server ConnectionManagerV1.xml > connectionmanager.gen.c
 
-dist_data_DATA = MediaRendererV1.xml MediaRendererV2.xml \
-	     AVTransportV1.xml AVTransportV2.xml \
-	     ConnectionManagerV1.xml ConnectionManagerV2.xml \
-	     RenderingControlV1.xml RenderingControlV2.xml
+m3playerdir = $(datadir)/m3player
+m3player_DATA = MediaRendererV1.xml MediaRendererV2.xml \
+		AVTransportV1.xml AVTransportV2.xml \
+		ConnectionManagerV1.xml ConnectionManagerV2.xml \
+		RenderingControlV1.xml RenderingControlV2.xml
+
+dist_sysconf_DATA = presets.list
+
+vardir = $(localstatedir)/run/m3player
+var_DATA = preset.last
 
 CLEANFILES = *.gen.c
 DISTCLEANFILES = *.gen.c
-MAINTAINERCLEANFILES = Makefile.in *.gen.ca
+MAINTAINERCLEANFILES = Makefile.in *.gen.c
 

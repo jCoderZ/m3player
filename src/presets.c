@@ -30,6 +30,9 @@ GString *presets_last = NULL;
 GList *presets = NULL;
 gint presets_current_index = -1;
 
+/**
+  Reads the file presets.list into
+ */
 gint
 presets_read_list (GString *last)
 {
@@ -158,3 +161,4 @@ presets_cleanup ()
     g_list_foreach (presets, (GFunc) g_free, NULL);
     g_list_free (presets);
 }
+
