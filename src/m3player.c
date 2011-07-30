@@ -49,6 +49,7 @@ static GOptionEntry entries[] =
   { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file", NULL },
   { "pidfile", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file", NULL },
   { "xmlfolder", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
+  { "version", 'v', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
   { NULL }
 };
 
@@ -256,8 +257,9 @@ main (int argc, char **argv)
     gchar *url = presets_next ();
     if (url)
     {
-        g_debug ("Playing url %s", url);
+        g_debug ("Setting url %s", url);
         gstreamer_set_uri (url);
+        g_debug ("Playing...");
         gstreamer_play ();
     }
     else
@@ -265,12 +267,16 @@ main (int argc, char **argv)
         g_debug ("No preset!");
     }
     
+    g_debug ("Running main-loop...");
     g_main_loop_run (main_loop);
 
+    g_debug ("Cleaning up presets...");
     presets_cleanup();
 
+    g_debug ("Cleaning up avtransport...");
     avtransport_cleanup(main_loop);
 
+    g_debug ("Unreferencing...");
     g_main_loop_unref (main_loop);
     g_object_unref (connectionManagerService);
     g_object_unref (renderingControlService);
@@ -279,5 +285,6 @@ main (int argc, char **argv)
     g_object_unref (dev);
     g_object_unref (context);
 
+    g_debug ("Exiting...");
     return EXIT_SUCCESS;
 }
