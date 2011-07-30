@@ -23,51 +23,42 @@
 
 #define LINE_BUFFER_SIZE 8192
 
-static const char presets_list_filename[] = "presets.list";
 static const char presets_last_filename[] = "preset.last";
 
-GString *presets_last = NULL;
-GList *presets = NULL;
-gint presets_current_index = -1;
+static GString *presets_last = NULL;
+static gsize presets_count = 0;
+static gchar **presets = NULL;
+static gint presets_current_index = -1;
 
 /**
   Reads the file presets.list into
  */
 gint
-presets_read_list (GString *last)
+presets_read_list (GString *last, GKeyFile *iniFile)
 {
-    gint index = -1;
     gint previous_index = -1;
 
-    FILE *file = fopen ( presets_list_filename, "r" );
-    if (file != NULL)
+    g_debug ("Getting goup/key Presets/List... (%ld)", (long int) iniFile);
+    presets = g_key_file_get_string_list (iniFile, "Presets", "List", &presets_count, NULL);
+    if (!presets)
     {
-        char line[LINE_BUFFER_SIZE];
+        g_printerr ("Could not read presets");
+        return -1;
+    }
 
-        while (fgets (line, sizeof line, file) != NULL)
+    gint i = 0;
+    gint index = -1;
+    for (i = 0; i < presets_count; i++)
+    {
+        g_debug ("preset[%d]=%s", i, presets[i]);
+        if (strcmp (presets[i], last->str) == 0)
         {
-            size_t len = strcspn (line, "\n");
-            line[len] = '\0';
-
-            if (strcmp (line, last->str) == 0)
-            {
-                g_debug ("Found preset at index %d: %s", index + 1, line);
-                previous_index = index;
-            }
-
-            index++;
-
-            GString *url = g_string_new (line);
-            presets = g_list_append (presets, url);
-
-            g_debug ("list[%d]: '%s'", index, line);
+            g_debug ("Found last preset at index %d: %s", index + 1, presets[i]);
+            previous_index = index;
         }
 
-        fclose (file);
-    }
-    else
-    {
-        g_warning ("Could not read %s", presets_list_filename);
+        g_debug ("list[%d]: '%s'", i, presets[i]);
+        index++;
     }
 
     return previous_index;
@@ -94,7 +85,7 @@ presets_read_last ()
     }
     else
     {
-        g_warning ("Could not read %s", presets_list_filename);
+        g_warning ("Could not read %s", presets_last_filename);
     }
 
     // TODO: Read the state file with the last index numbers
@@ -105,33 +96,30 @@ presets_read_last ()
     return result;
 }
 
-GString*
-presets_write_last (GString *preset)
+void
+presets_write_last (gchar *preset)
 {
-    GString *result = NULL;
     FILE *file = fopen ( presets_last_filename, "w" );
     if (file != NULL)
     {
-        fputs (preset->str, file);
+        fputs (preset, file);
         fclose (file);
     }
     else
     {
         g_warning ("Could not write %s", presets_last_filename);
     }
-    return result;
 }
 
-GString*
+gchar*
 presets_next ()
 {
-    GString *result = NULL;
-    gint len = g_list_length (presets);
+    gchar *result = NULL;
     if (presets_current_index == -1)
     {
         presets_current_index = 0;
     }
-    else if (presets_current_index >= len - 1)
+    else if (presets_current_index >= presets_count - 1)
     {
         presets_current_index = 0;
     }
@@ -139,17 +127,20 @@ presets_next ()
     {
         presets_current_index++;
     }
-    result = (GString*) g_list_nth_data (presets, presets_current_index);
+    result = presets[presets_current_index];
     presets_write_last (result);
     return result;
 }
 
 void
-presets_init (void (*signal_handler)(int))
+presets_init (void (*signal_handler)(int), GKeyFile* iniFile)
 {
+    g_debug ("Read last preset...");
     presets_last = presets_read_last ();
-    presets_current_index = presets_read_list (presets_last);
+    g_debug ("Read preset list...");
+    presets_current_index = presets_read_list (presets_last, iniFile);
     
+    g_debug ("Installing signal handler for USR1...");
     signal (SIGUSR1, signal_handler);
 }
 
@@ -157,8 +148,7 @@ void
 presets_cleanup ()
 {
     g_string_free (presets_last, TRUE);
-    
-    g_list_foreach (presets, (GFunc) g_free, NULL);
-    g_list_free (presets);
+
+    g_strfreev (presets);
 }
 

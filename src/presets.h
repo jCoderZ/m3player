@@ -26,7 +26,7 @@ presets_init ();
 void
 presets_cleanup ();
 
-GString*
+gchar*
 presets_next ();
 
 #endif

@@ -31,21 +31,21 @@
     <service>
       <serviceType>urn:schemas-upnp-org:service:RenderingControl:2</serviceType>
       <serviceId>urn:upnp-org:serviceId:RenderingControl:2</serviceId>
-      <SCPDURL>/RenderingControl/description2.xml</SCPDURL>
+      <SCPDURL>/RenderingControlV2.xml</SCPDURL>
       <controlURL>/RenderingControl/Control</controlURL>
       <eventSubURL>/RenderingControl/Event</eventSubURL>
     </service>
     <service>
       <serviceType>urn:schemas-upnp-org:service:ConnectionManager:2</serviceType>
       <serviceId>urn:upnp-org:serviceId:ConnectionManager:2</serviceId>
-      <SCPDURL>/ConnectionManager/description2.xml</SCPDURL>
+      <SCPDURL>/ConnectionManagerV2.xml</SCPDURL>
       <controlURL>/ConnectionManager/Control</controlURL>
       <eventSubURL>/ConnectionManager/Event</eventSubURL>
     </service>
     <service>
       <serviceType>urn:schemas-upnp-org:service:AVTransport:2</serviceType>
       <serviceId>urn:upnp-org:serviceId:AVTransport:2</serviceId>
-      <SCPDURL>/AVTransport/description2.xml</SCPDURL>
+      <SCPDURL>/AVTransportV2.xml</SCPDURL>
       <controlURL>/AVTransport/Control</controlURL>
       <eventSubURL>/AVTransport/Event</eventSubURL>
     </service>

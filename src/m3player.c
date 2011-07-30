@@ -31,12 +31,36 @@ GUPnPService *connectionManagerService;
 GUPnPService *renderingControlService;
 GUPnPService *avTransportService;
 
+/*
+
+   ...
+
+ */
+
+static const char *CONFIG_FILE_DEFAULT = "/etc/m3player/m3player.ini";
+static const gchar *configFile = NULL;
+static const char *PID_FILE_DEFAULT = "/var/run/m3player.pid";
+static const gchar *pidFile = NULL;
+static const char *XML_FOLDER_DEFAULT = "/usr/share/m3player";
+static const gchar *pidFile = NULL;
+
+static GOptionEntry entries[] =
+{
+  { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file", CONFIG_FILE_DEFAULT },
+  { "pidfile", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file", PID_FILE_DEFAULT },
+  { "xmlfolder", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", XML_FOLDER_DEFAULT },
+  { NULL }
+};
+
+static GKeyFile *iniFile = NULL;
+
+
 void
 presets_signal_handler (int sig) 
 {
-    GString *url = presets_next();
-    g_debug("Next station: '%s'", url->str);
-    gstreamer_set_uri (url->str);
+    gchar *url = presets_next();
+    g_debug("Next station: '%s'", url);
+    gstreamer_set_uri (url);
     gstreamer_play ();
 }
 
@@ -46,7 +70,7 @@ write_pid_file ()
     FILE *file;
     pid_t pid;
     pid = getpid ();
-    file = fopen ("/var/run/m3ddity-player.pid","w");
+    file = fopen (pidFile, "w");
     if (file)
     {
         fprintf (file,"%d", pid);
@@ -54,8 +78,9 @@ write_pid_file ()
     }
 }
 
+
 gint
-gupnp_init ()
+gupnp_init (const gchar *xmlFolder)
 {
     GError *error = NULL;
     g_debug ("Create the UPnP context");
@@ -70,7 +95,7 @@ gupnp_init ()
     g_debug ("Running on port %d", gupnp_context_get_port (context));
 
     g_debug ("Create root device");
-    dev = gupnp_root_device_new (context, "description2.xml", ".");
+    dev = gupnp_root_device_new (context, "MediaRendererV2.xml", xmlFolder);
 
     g_debug ("Announce root device");
     gupnp_root_device_set_available (dev, TRUE);
@@ -84,6 +109,13 @@ gupnp_init ()
         return EXIT_FAILURE;
     }
     gupnp_service_signals_autoconnect (GUPNP_SERVICE (connectionManagerService), NULL, &error);
+    if (error)
+    {
+        g_printerr ("Could not autoconnect signals: %s", error->message);
+        g_error_free (error);
+
+        return EXIT_FAILURE;
+    }
 
     g_debug ("Get the rendering control service");
     renderingControlService = GUPNP_SERVICE(gupnp_device_info_get_service
@@ -94,8 +126,14 @@ gupnp_init ()
         return EXIT_FAILURE;
     }
     gupnp_service_signals_autoconnect (GUPNP_SERVICE (renderingControlService), NULL, &error);
-    
+    if (error)
+    {
+        g_printerr ("Could not autoconnect signals: %s", error->message);
+        g_error_free (error);
 
+        return EXIT_FAILURE;
+    }
+    
     g_debug ("Get the av transport service");
     avTransportService = GUPNP_SERVICE(gupnp_device_info_get_service
         (GUPNP_DEVICE_INFO (dev), "urn:schemas-upnp-org:service:AVTransport:1"));
@@ -105,6 +143,13 @@ gupnp_init ()
         return EXIT_FAILURE;
     }
     gupnp_service_signals_autoconnect (GUPNP_SERVICE (avTransportService), NULL, &error);
+    if (error)
+    {
+        g_printerr ("Could not autoconnect signals: %s", error->message);
+        g_error_free (error);
+
+        return EXIT_FAILURE;
+    }
     // additionally connect avtransport's version of last_change
 //    avtransport_last_change_query_connect (GUPNP_SERVICE (avTransportService), 
 //                                           query_avtransport_last_change_cb, NULL);
@@ -115,29 +160,91 @@ gupnp_init ()
 int
 main (int argc, char **argv)
 {
-    GMainLoop *main_loop;
+    // Parse command line
+    GError *optionError = NULL;
+    GOptionContext *context;
+    context = g_option_context_new ("m3player");
+    g_option_context_add_main_entries (context, entries, NULL);
+    if (!g_option_context_parse (context, &argc, &argv, &optionError))
+    {
+        g_printerr ("option parsing failed: %s\n", optionError->message);
+        g_error_free (optionError);
+        exit (1);
+    }
+
+    // Set defaults
+    if (configFile == NULL)
+    {
+        g_debug ("Setting configFile to default: %s", CONFIG_FILE_DEFAULT);
+        configFile = CONFIG_FILE_DEFAULT;
+    }
+    if (xmlFolder == NULL)
+    {
+        g_debug ("Setting XML folder to default: %s", XML_FOLDER_DEFAULT);
+        xmlFolder = XML_FOLDER_DEFAULT;
+    }
+    if (pidFile == NULL)
+    {
+        g_debug ("Setting PID file to default: %s", PID_FILE_DEFAULT);
+        pidFile = PID_FILE_DEFAULT;
+    }
+
+    // Load ini file
+    if (g_file_test (configFile, G_FILE_TEST_EXISTS)) 
+    {
+        GError *iniError = NULL;
+        g_debug("Reading config file: %s", configFile);
+        iniFile = g_key_file_new ();
+        if (!g_key_file_load_from_file (iniFile, configFile, G_KEY_FILE_NONE, &iniError))
+        {
+            g_printerr ("reading ini file failed! %s\n", iniError->message);
+            g_error_free (iniError);
+            exit (2);
+        }
+    }
+    else
+    {
+        g_printerr ("Specified config file does not exist: %s\n", configFile);
+        exit (3);
+    }
+
+    // Test whether the folder exists
+    if (!g_file_test (xmlFolder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
+    {
+        g_printerr ("Specified XML folder does not exist: %s\n", xmlFolder);
+        exit (4);
+    }
     
+    // Initialize sub-systems
     g_thread_init (NULL);
     g_type_init ();
     gst_init (NULL, NULL);
-
-    int rc = gupnp_init ();
+    int rc = gupnp_init (xmlFolder);
     if (rc != 0)
     {
+        g_printerr ("GUPnP initialization failed!");
         return rc;
     }
 
+    GMainLoop *main_loop;
     g_debug ("Run the main loop");
     main_loop = g_main_loop_new (NULL, FALSE);
 
     avtransport_init(main_loop);
 
-    presets_init (presets_signal_handler);
-    GString *url = presets_next ();
+    g_debug ("Initializing presets...");
+    presets_init (presets_signal_handler, iniFile);
+    g_debug ("Setting next preset...");
+    gchar *url = presets_next ();
     if (url)
     {
-        gstreamer_set_uri (url->str);
+        g_debug ("Playing url %s", url);
+        gstreamer_set_uri (url);
         gstreamer_play ();
+    }
+    else
+    {
+        g_debug ("No preset!");
     }
     
     g_main_loop_run (main_loop);

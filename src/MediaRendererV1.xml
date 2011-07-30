@@ -38,7 +38,7 @@
     <service>
       <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
       <serviceId>urn:upnp-org:serviceId:ConnectionManager:1</serviceId>
-      <SCPDURL>/ConnectionManager1.xml</SCPDURL>
+      <SCPDURL>/ConnectionManagerV1.xml</SCPDURL>
       <controlURL>/ConnectionManager/Control</controlURL>
       <eventSubURL>/ConnectionManager/Event</eventSubURL>
     </service>
