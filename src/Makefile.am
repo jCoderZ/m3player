@@ -22,7 +22,7 @@ m3player_DATA = MediaRendererV1.xml MediaRendererV2.xml \
 		ConnectionManagerV1.xml ConnectionManagerV2.xml \
 		RenderingControlV1.xml RenderingControlV2.xml
 
-dist_sysconf_DATA = presets.list preset.last
+dist_sysconf_DATA = m3player.ini
 
 CLEANFILES = *.gen.c
 DISTCLEANFILES = *.gen.c
