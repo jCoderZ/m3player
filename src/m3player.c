@@ -37,18 +37,18 @@ GUPnPService *avTransportService;
 
  */
 
-static const char *CONFIG_FILE_DEFAULT = "/etc/m3player/m3player.ini";
+static const gchar *CONFIG_FILE_DEFAULT = "/etc/m3player/m3player.ini";
 static const gchar *configFile = NULL;
-static const char *PID_FILE_DEFAULT = "/var/run/m3player.pid";
+static const gchar *PID_FILE_DEFAULT = "/var/run/m3player.pid";
 static const gchar *pidFile = NULL;
-static const char *XML_FOLDER_DEFAULT = "/usr/share/m3player";
-static const gchar *pidFile = NULL;
+static const gchar *XML_FOLDER_DEFAULT = "/usr/share/m3player";
+static const gchar *xmlFolder = NULL;
 
 static GOptionEntry entries[] =
 {
-  { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file", CONFIG_FILE_DEFAULT },
-  { "pidfile", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file", PID_FILE_DEFAULT },
-  { "xmlfolder", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", XML_FOLDER_DEFAULT },
+  { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file", NULL },
+  { "pidfile", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file", NULL },
+  { "xmlfolder", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
   { NULL }
 };
 
