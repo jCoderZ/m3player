@@ -51,10 +51,13 @@ presets_read_list (GString *last, GKeyFile *iniFile)
     for (i = 0; i < presets_count; i++)
     {
         g_debug ("preset[%d]=%s", i, presets[i]);
-        if (strcmp (presets[i], last->str) == 0)
+        if (last)
         {
-            g_debug ("Found last preset at index %d: %s", index + 1, presets[i]);
-            previous_index = index;
+            if (strcmp (presets[i], last->str) == 0)
+            {
+                g_debug ("Found last preset at index %d: %s", index + 1, presets[i]);
+                previous_index = index;
+            }
         }
 
         g_debug ("list[%d]: '%s'", i, presets[i]);
@@ -81,6 +84,8 @@ presets_read_last ()
             result = g_string_new (line);
         }
 
+        g_debug ("last: %s", result->str);
+
         fclose (file);
     }
     else
@@ -90,8 +95,6 @@ presets_read_last ()
 
     // TODO: Read the state file with the last index numbers
     presets_current_index = -1;
-
-    g_debug ("last: %s", result->str);
 
     return result;
 }
