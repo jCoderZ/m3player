@@ -26,6 +26,49 @@
 typedef gchar *(*query_callback) (GUPnPService *service,
                                         gpointer userdata);
 
+// Enumerations
+enum TransportState {
+    STOPPED,
+    PLAYING,
+    TRANSITIONING,
+    PAUSED_PLAYBACK,
+    PAUSED_RECORDING,
+    RECORDING,
+    NO_MEDIA_PRESENT
+};
+
+enum TransportStatus {
+    OK,
+    ERROR_OCCURED
+};
+
+enum CurrentMediaCategory {
+    NO_MEDIA,
+    TRACK_AWARE,
+    TRACK_UNAWARE
+};
+
+enum PlayMode {
+    NORMAL,
+    SHUFFLE,
+    REPEAT_ONE,
+    REPEAT_ALL,
+    RANDOM,
+    DIRECT_1,
+    INTRO
+};
+
+enum CurrentTransportActions {
+    PLAY,
+    STOP,
+    PAUSE,
+    SEEK,
+    NEXT,
+    PREVIOUS,
+    RECORD
+};
+
+
 void set_avtransport_uri (gchar *current_track_uri);
 void play ();
 
@@ -42,5 +85,36 @@ gulong
 avtransport_last_change_query_connect (GUPnPService *service,
                                        query_callback callback,
                                        gpointer userdata);
+
+void
+set_transport_state (GString *last_change, int ts);
+void
+set_transport_status (GString *last_change, int ts);
+void
+set_current_media_category (GString *last_change, int cmc);
+void
+set_current_play_mode (GString *last_change, int cpm);
+void
+set_current_play_speed (GString *last_change, int cpm);
+void
+set_number_of_tracks (GString *last_change, int number_of_tracks);
+void
+set_current_track (GString *last_change, int current_track);
+void
+set_current_track_duration (GString *last_change, gint64 current_track_duration);
+void
+set_current_media_duration (GString *last_change, gint64 media_duration);
+void
+set_current_track_meta_data (GString *last_change, const gchar* current_track_meta_data);
+void
+set_current_track_uri (GString *last_change, const gchar* current_track_uri);
+void
+set_relative_time_position (GString* last_change, gint64 relative_time_position);
+void
+set_absolute_time_position (GString *last_change, gint64 absolute_time_position);
+void
+set_relative_counter_position (GString *last_change, gint64 relative_counter_position);
+void
+set_absolute_counter_position (GString *last_change, gint64 absolute_counter_position);
 
 #endif

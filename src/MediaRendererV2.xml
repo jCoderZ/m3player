@@ -7,9 +7,9 @@
   <!-- URLBase>http://localhost</URLBase -->
   <device>
     <deviceType>urn:schemas-upnp-org:device:MediaRenderer:2</deviceType>
-    <friendlyName>GUPnP Audio Renderer</friendlyName>
-    <manufacturer>Michael Rumpf</manufacturer>
-    <modelName>model name</modelName>
+    <friendlyName>m3ddity player - m3player</friendlyName>
+    <manufacturer>jCoderZ.org</manufacturer>
+    <modelName>m3player - VERSION</modelName>
     <UDN>uuid:a2b641be-9543-11e0-bd20-001966f2c8ac</UDN>
     <!--
     <manufacturerURL>http://michael.rumpfonline.de</manufacturerURL>

@@ -46,49 +46,6 @@ const gchar *LAST_CHANGE_KEY_RELATIVE_COUNTER_POSITION = "RelativeCounterPositio
 const gchar *LAST_CHANGE_KEY_ABSOLUTE_COUNTER_POSITION = "AbsoluteCounterPosition";
 const gchar *LAST_CHANGE_KEY_CURRENT_TRANSPORT_ACTIONS = "CurrentTransportActions";
 
-// Enumerations
-enum TransportState {
-    STOPPED,
-    PLAYING,
-    TRANSITIONING,
-    PAUSED_PLAYBACK,
-    PAUSED_RECORDING,
-    RECORDING,
-    NO_MEDIA_PRESENT
-};
-
-enum TransportStatus {
-    OK,
-    ERROR_OCCURED
-};
-
-enum CurrentMediaCategory {
-    NO_MEDIA,
-    TRACK_AWARE,
-    TRACK_UNAWARE
-};
-
-enum PlayMode {
-    NORMAL,
-    SHUFFLE,
-    REPEAT_ONE,
-    REPEAT_ALL,
-    RANDOM,
-    DIRECT_1,
-    INTRO
-};
-
-enum CurrentTransportActions {
-    PLAY,
-    STOP,
-    PAUSE,
-    SEEK,
-    NEXT,
-    PREVIOUS,
-    RECORD
-};
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // State-Variables
 ///////////////////////////////////////////////////////////////////////////////
@@ -368,8 +325,11 @@ set_transport_state (GString *last_change, int ts)
 {
     sv_transport_state = ts;
 
-    last_change_append_gchar (last_change, LAST_CHANGE_KEY_TRANSPORT_STATE, 
-                              transport_state_to_string (sv_transport_state));
+    if (last_change)
+    {
+        last_change_append_gchar (last_change, LAST_CHANGE_KEY_TRANSPORT_STATE, 
+                                  transport_state_to_string (sv_transport_state));
+    }
 }
 
 
@@ -388,8 +348,11 @@ set_transport_status (GString *last_change, int ts)
 {
     sv_transport_status = ts;
 
-    last_change_append_gchar (last_change, LAST_CHANGE_KEY_TRASNPORT_STATUS, 
-                              transport_status_to_string (sv_transport_status));
+    if (last_change)
+    {
+        last_change_append_gchar (last_change, LAST_CHANGE_KEY_TRASNPORT_STATUS, 
+                                  transport_status_to_string (sv_transport_status));
+    }
 }
 
 
@@ -408,8 +371,11 @@ set_current_media_category (GString *last_change, int cmc)
 {
     sv_current_media_category = cmc;
 
-    last_change_append_gchar (last_change, LAST_CHANGE_KEY_CURRENT_MEDIA_CATEGORY, 
-                              current_media_category_to_string (sv_current_media_category));
+    if (last_change)
+    {
+        last_change_append_gchar (last_change, LAST_CHANGE_KEY_CURRENT_MEDIA_CATEGORY, 
+                                  current_media_category_to_string (sv_current_media_category));
+    }
 
     // 2.2.13: For track-unaware media, this state variable will always be set to 1.
     // 2.2.14: For track-unaware media, this state variable is always 1
@@ -417,11 +383,17 @@ set_current_media_category (GString *last_change, int cmc)
     {
         sv_number_of_tracks = 1;
 
-        last_change_append_int (last_change, LAST_CHANGE_KEY_NUMBER_OF_TRACKS, sv_number_of_tracks);
+        if (last_change)
+        {
+            last_change_append_int (last_change, LAST_CHANGE_KEY_NUMBER_OF_TRACKS, sv_number_of_tracks);
+        }
 
         sv_current_track = 1;
 
-        last_change_append_int (last_change, LAST_CHANGE_KEY_CURRENT_TRACK, sv_current_track);
+        if (last_change)
+        {
+            last_change_append_int (last_change, LAST_CHANGE_KEY_CURRENT_TRACK, sv_current_track);
+        }
     }
 }
 
@@ -441,8 +413,11 @@ set_current_play_mode (GString *last_change, int cpm)
 {
     sv_current_play_mode = cpm;
 
-   last_change_append_int (last_change, LAST_CHANGE_KEY_PLAY_MODE, 
-                           sv_current_play_mode);
+    if (last_change)
+    {
+       last_change_append_int (last_change, LAST_CHANGE_KEY_PLAY_MODE, 
+                               sv_current_play_mode);
+    }
 }
 
 
@@ -465,8 +440,11 @@ set_current_play_speed (GString *last_change, int cpm)
 
     sv_current_play_speed = cpm;
 
-    last_change_append_int (last_change, LAST_CHANGE_KEY_TRANSPORT_PLAY_SPEED, 
-                            sv_current_play_speed);
+    if (last_change)
+    {
+        last_change_append_int (last_change, LAST_CHANGE_KEY_TRANSPORT_PLAY_SPEED, 
+                                sv_current_play_speed);
+    }
 }
 
 
@@ -485,13 +463,19 @@ set_number_of_tracks (GString *last_change, int number_of_tracks)
 {
     sv_number_of_tracks = number_of_tracks;
 
-    last_change_append_int (last_change, LAST_CHANGE_KEY_NUMBER_OF_TRACKS, sv_number_of_tracks);
+    if (last_change)
+    {
+        last_change_append_int (last_change, LAST_CHANGE_KEY_NUMBER_OF_TRACKS, sv_number_of_tracks);
+    }
 
     if (sv_number_of_tracks == 0)
     {
         sv_current_track = 0;
         
-        last_change_append_int (last_change, LAST_CHANGE_KEY_CURRENT_TRACK, sv_current_track);
+        if (last_change)
+        {
+            last_change_append_int (last_change, LAST_CHANGE_KEY_CURRENT_TRACK, sv_current_track);
+        }
     }
 }
 
@@ -523,7 +507,10 @@ set_current_track (GString *last_change, int current_track)
         g_warning("Invalid current track: %d (#%d)", current_track, sv_number_of_tracks);
     }
 
-    last_change_append_int (last_change, LAST_CHANGE_KEY_CURRENT_TRACK, sv_current_track);
+    if (last_change)
+    {
+        last_change_append_int (last_change, LAST_CHANGE_KEY_CURRENT_TRACK, sv_current_track);
+    }
 }
 
 
@@ -544,8 +531,11 @@ set_current_track_duration (GString *last_change, gint64 current_track_duration)
 
     sv_current_track_duration_string = gstreamer_format_time (sv_current_track_duration);
 
-    last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_TRACK_DURATION, 
-                                sv_current_track_duration_string);
+    if (last_change)
+    {
+        last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_TRACK_DURATION, 
+                                    sv_current_track_duration_string);
+    }
 }
 
 
@@ -571,8 +561,11 @@ set_current_media_duration (GString *last_change, gint64 media_duration)
 
     sv_current_media_duration_string = gstreamer_format_time (sv_current_media_duration);
 
-    last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_MEDIA_DURATION, 
-                                sv_current_media_duration_string);
+    if (last_change)
+    {
+        last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_MEDIA_DURATION, 
+                                   sv_current_media_duration_string);
+    }
 }
 
 
@@ -591,8 +584,11 @@ set_current_track_meta_data (GString *last_change, const gchar* current_track_me
 {
     sv_current_track_meta_data = g_string_new (current_track_meta_data);
 
-    last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_TRACK_META_DATA, 
-                                sv_current_track_meta_data);
+    if (last_change)
+    {
+        last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_TRACK_META_DATA, 
+                                    sv_current_track_meta_data);
+    }
 }
 
 
@@ -611,8 +607,11 @@ set_current_track_uri (GString *last_change, const gchar* current_track_uri)
 {
     sv_current_track_uri = g_string_new (current_track_uri);
 
-    last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_TRACK_URI, 
-                                sv_current_track_uri);
+    if (last_change)
+    {
+        last_change_append_gstring (last_change, LAST_CHANGE_KEY_CURRENT_TRACK_URI, 
+                                    sv_current_track_uri);
+    }
 }
 
 
@@ -633,8 +632,11 @@ set_relative_time_position (GString* last_change, gint64 relative_time_position)
 
     sv_relative_time_position_string = gstreamer_format_time (sv_relative_time_position);
     
-    last_change_append_gstring (last_change, LAST_CHANGE_KEY_RELATIVE_TIME_POSITION, 
-                                sv_relative_time_position_string);
+    if (last_change)
+    {
+        last_change_append_gstring (last_change, LAST_CHANGE_KEY_RELATIVE_TIME_POSITION, 
+                                    sv_relative_time_position_string);
+    }
 
     sv_relative_counter_position_string = gstreamer_format_time (sv_relative_time_position);
     
@@ -660,13 +662,19 @@ set_absolute_time_position (GString *last_change, gint64 absolute_time_position)
 
     sv_absolute_time_position_string = gstreamer_format_time (sv_absolute_time_position);
 
-    last_change_append_gstring (last_change, LAST_CHANGE_KEY_ABSOLUTE_TIME_POSITION, 
-                                sv_absolute_time_position_string);
+    if (last_change)
+    {
+        last_change_append_gstring (last_change, LAST_CHANGE_KEY_ABSOLUTE_TIME_POSITION, 
+                                    sv_absolute_time_position_string);
+    }
 
     sv_absolute_counter_position_string = gstreamer_format_time (sv_absolute_time_position);
 
-    last_change_append_gstring (last_change, LAST_CHANGE_KEY_ABSOLUTE_COUNTER_POSITION, 
-                                sv_absolute_counter_position_string);
+    if (last_change)
+    {
+        last_change_append_gstring (last_change, LAST_CHANGE_KEY_ABSOLUTE_COUNTER_POSITION, 
+                                    sv_absolute_counter_position_string);
+    }
 }
 
 
@@ -1156,8 +1164,10 @@ previous_cb (GUPnPService *service,
 gint
 avtransport_init (GMainLoop *main_loop)
 {
+    g_debug ("Initializing state variables...");
     avtransport_state_variables_init ();
 
+    g_debug ("Initializing gstreamer sub-system...");
     gstreamer_init (main_loop);
 
     return 0;

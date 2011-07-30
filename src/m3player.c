@@ -62,6 +62,23 @@ presets_signal_handler (int sig)
     g_debug("Next station: '%s'", url);
     gstreamer_set_uri (url);
     gstreamer_play ();
+
+    
+    set_transport_state (NULL, PLAYING);
+    set_transport_status (NULL, OK);
+    set_current_media_category (NULL, TRACK_UNAWARE);
+    set_current_play_mode (NULL, NORMAL);
+    set_current_play_speed (NULL, 1);
+    set_number_of_tracks (NULL, 1);
+    set_current_track (NULL, 1);
+    //set_current_track_duration (NULL, );
+    //set_current_media_duration (NULL, );
+    //set_current_track_meta_data (NULL, );
+    set_current_track_uri (NULL, url);
+    //set_relative_time_position (NULL, );
+    //set_absolute_time_position (NULL, );
+    //set_relative_counter_position (NULL, );
+    //set_absolute_counter_position (NULL, );
 }
 
 void
@@ -227,9 +244,10 @@ main (int argc, char **argv)
     }
 
     GMainLoop *main_loop;
-    g_debug ("Run the main loop");
+    g_debug ("Create new main loop...");
     main_loop = g_main_loop_new (NULL, FALSE);
 
+    g_debug ("Initializing AVTransport instance...");
     avtransport_init(main_loop);
 
     g_debug ("Initializing presets...");
