@@ -22,7 +22,8 @@ m3player_DATA = MediaRendererV1.xml MediaRendererV2.xml \
 		ConnectionManagerV1.xml ConnectionManagerV2.xml \
 		RenderingControlV1.xml RenderingControlV2.xml
 
-dist_sysconf_DATA = m3player.ini
+configdir = $(sysconfdir)/m3player
+dist_config_DATA = m3player.ini
 
 hotplugdir = $(sysconfdir)/hotplug.d/button
 dist_hotplug_DATA = buttons
@@ -30,4 +31,3 @@ dist_hotplug_DATA = buttons
 CLEANFILES = *.gen.c
 DISTCLEANFILES = *.gen.c
 MAINTAINERCLEANFILES = Makefile.in *.gen.c
-
