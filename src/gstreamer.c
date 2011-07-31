@@ -21,6 +21,7 @@
 
 const static gint ONE = 1;
 GstElement *pipeline;
+GstElement *source, *filter, *sink;
 GString *mime_types = NULL;
 
 GString*
@@ -35,7 +36,7 @@ void
 gstreamer_print_uri (const char *prefix)
 {
     gchar *uri;
-    g_object_get (G_OBJECT (pipeline), "uri", &uri, NULL);
+    g_object_get (G_OBJECT (source), "location", &uri, NULL);
     g_debug("%s: %s", prefix, uri);
     g_free(uri);
 }
@@ -44,9 +45,9 @@ void
 gstreamer_set_uri (gchar *uri)
 {
     gst_element_set_state (pipeline, GST_STATE_NULL);
-    g_object_set (G_OBJECT (pipeline), "uri", uri, NULL);
+    g_object_set (G_OBJECT (source), "location", uri, NULL);
 
-    gstreamer_print_uri ("uri");
+    gstreamer_print_uri ("location");
 }
 
 void
@@ -287,10 +288,27 @@ gstreamer_init (GMainLoop *main_loop)
 {
     GstBus *bus;
 
+    gst_init (NULL, NULL);
+
+    pipeline = gst_pipeline_new ("m3player-pipeline");
+
+    source = gst_element_factory_make ("souphttpsrc", "source");
+    filter = gst_element_factory_make ("mad", "filter");
+    sink = gst_element_factory_make ("alsasink", "sink");
+
+    gst_bin_add_many (GST_BIN (pipeline), source, filter, sink, NULL);
+
+    if (!gst_element_link_many (source, filter, sink, NULL)) {
+        g_warning ("Failed to link elements!");
+    }
+
     // set up
-    pipeline = gst_element_factory_make ("playbin2", "play");
+    //pipeline = gst_element_factory_make ("playbin2", "play");
+    //g_debug("pipeline=%ld", (long int) pipeline):
+
 
     bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
+    g_debug("bus=%ld", (long int) bus);
     gst_bus_add_watch (bus, bus_call, main_loop);
     gst_object_unref (bus);
 
@@ -305,5 +323,8 @@ gstreamer_cleanup ()
     g_string_free (mime_types, TRUE);
 
     gst_element_set_state (pipeline, GST_STATE_NULL);
+    gst_object_unref (GST_OBJECT (source));
+    gst_object_unref (GST_OBJECT (filter));
+    gst_object_unref (GST_OBJECT (sink));
     gst_object_unref (GST_OBJECT (pipeline));
 }

@@ -1167,9 +1167,6 @@ avtransport_init (GMainLoop *main_loop)
     g_debug ("Initializing state variables...");
     avtransport_state_variables_init ();
 
-    g_debug ("Initializing gstreamer sub-system...");
-    gstreamer_init (main_loop);
-
     return 0;
 }
 

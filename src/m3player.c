@@ -233,20 +233,23 @@ main (int argc, char **argv)
         exit (4);
     }
     
+    GMainLoop *main_loop;
+    g_debug ("Create new main loop...");
+    main_loop = g_main_loop_new (NULL, FALSE);
+
     // Initialize sub-systems
     g_thread_init (NULL);
     g_type_init ();
-    gst_init (NULL, NULL);
+
+    g_debug ("Initializing gstreamer sub-system...");
+    gstreamer_init (main_loop);
+
     int rc = gupnp_init (xmlFolder);
     if (rc != 0)
     {
         g_printerr ("GUPnP initialization failed!");
         return rc;
     }
-
-    GMainLoop *main_loop;
-    g_debug ("Create new main loop...");
-    main_loop = g_main_loop_new (NULL, FALSE);
 
     g_debug ("Initializing AVTransport instance...");
     avtransport_init(main_loop);
