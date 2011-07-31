@@ -52,9 +52,8 @@ static GOptionEntry entries[] =
   { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file", NULL },
   { "pidfile", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file", NULL },
   { "xmlfolder", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
-  { "version", 'v', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
   { "name", 'n', 0, G_OPTION_ARG_STRING, &hostName, "The name of the player instance", NULL },
-  { "filename", 'f', 0, G_OPTION_ARG_STRING, &fileName, "The name of the player instance", NULL },
+  { "filename", 'f', 0, G_OPTION_ARG_STRING, &fileName, "The name of the root device file", NULL },
   { NULL }
 };
 
@@ -260,6 +259,7 @@ main (int argc, char **argv)
         exit (4);
     }
 
+    // Write the pid file
     write_pid_file (pidFile);
     
     g_debug ("Create new main loop...");
