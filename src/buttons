@@ -1,0 +1,14 @@
+#!/bin/sh
+
+#logger $BUTTON
+#logger $ACTION
+
+if [ "$BUTTON" == "BTN_1" -a "$ACTION" == "pressed" ]
+then
+  PID=$(cat /var/run/m3player.pid)
+  if [ -z "$PID" ]
+  then
+    kill -USR1 $PID
+  fi
+fi
+

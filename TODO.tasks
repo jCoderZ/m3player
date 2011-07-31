@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <gtodo>
-  <category title="Personal" place="0"/>
+  <category title="Personal" place="0">
     <item>
       <summary>GStreamer Bug</summary>
       <comment>https://bugzilla.gnome.org/show_bug.cgi?id=653840</comment>

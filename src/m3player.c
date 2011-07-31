@@ -43,6 +43,9 @@ static const gchar *PID_FILE_DEFAULT = "/var/run/m3player.pid";
 static const gchar *pidFile = NULL;
 static const gchar *XML_FOLDER_DEFAULT = "/usr/share/m3player";
 static const gchar *xmlFolder = NULL;
+static const gchar *FILE_NAME_DEFAULT = "MediaRendererV1.xml";
+static const gchar *fileName = NULL;
+static gchar *hostName = NULL;
 
 static GOptionEntry entries[] =
 {
@@ -50,6 +53,8 @@ static GOptionEntry entries[] =
   { "pidfile", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file", NULL },
   { "xmlfolder", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
   { "version", 'v', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
+  { "name", 'n', 0, G_OPTION_ARG_STRING, &hostName, "The name of the player instance", NULL },
+  { "filename", 'f', 0, G_OPTION_ARG_STRING, &fileName, "The name of the player instance", NULL },
   { NULL }
 };
 
@@ -83,12 +88,12 @@ presets_signal_handler (int sig)
 }
 
 void
-write_pid_file ()
+write_pid_file (const gchar *pidfile)
 {
     FILE *file;
     pid_t pid;
     pid = getpid ();
-    file = fopen (pidFile, "w");
+    file = fopen (pidfile, "w");
     if (file)
     {
         fprintf (file,"%d", pid);
@@ -98,7 +103,7 @@ write_pid_file ()
 
 
 gint
-gupnp_init (const gchar *xmlFolder)
+gupnp_init (const gchar* fileName, const gchar *xmlFolder)
 {
     GError *error = NULL;
     g_debug ("Create the UPnP context");
@@ -113,7 +118,7 @@ gupnp_init (const gchar *xmlFolder)
     g_debug ("Running on port %d", gupnp_context_get_port (context));
 
     g_debug ("Create root device");
-    dev = gupnp_root_device_new (context, "MediaRendererV2.xml", xmlFolder);
+    dev = gupnp_root_device_new (context, fileName, xmlFolder);
 
     g_debug ("Announce root device");
     gupnp_root_device_set_available (dev, TRUE);
@@ -189,23 +194,45 @@ main (int argc, char **argv)
         g_error_free (optionError);
         exit (1);
     }
-
-    // Set defaults
+    
+    // Set defaults in case no command-line parameter has been given
     if (configFile == NULL)
     {
-        g_debug ("Setting configFile to default: %s", CONFIG_FILE_DEFAULT);
         configFile = CONFIG_FILE_DEFAULT;
     }
+    g_debug ("Setting configFile to %s", configFile);
+
     if (xmlFolder == NULL)
     {
-        g_debug ("Setting XML folder to default: %s", XML_FOLDER_DEFAULT);
         xmlFolder = XML_FOLDER_DEFAULT;
     }
+    g_debug ("Setting XML folder to %s", xmlFolder);
+
+    if (fileName == NULL)
+    {
+        fileName = FILE_NAME_DEFAULT;
+    }
+    g_debug ("Setting filename to %s", fileName);
+
     if (pidFile == NULL)
     {
-        g_debug ("Setting PID file to default: %s", PID_FILE_DEFAULT);
         pidFile = PID_FILE_DEFAULT;
     }
+    g_debug ("Setting PID file to %s", pidFile);
+
+    if (!hostName)
+    {
+        gchar host[HOST_NAME_MAX];
+        if (gethostname(host, HOST_NAME_MAX) == 0)
+        {
+            hostName = g_strdup (host);
+        }
+        else
+        {
+            hostName = g_strdup ("m3player");
+        }
+    }
+    g_debug ("Setting hostname default: %s", hostName);
 
     // Load ini file
     if (g_file_test (configFile, G_FILE_TEST_EXISTS)) 
@@ -226,16 +253,17 @@ main (int argc, char **argv)
         exit (3);
     }
 
-    // Test whether the folder exists
+    // Test whether the xml folder exists
     if (!g_file_test (xmlFolder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
     {
         g_printerr ("Specified XML folder does not exist: %s\n", xmlFolder);
         exit (4);
     }
+
+    write_pid_file (pidFile);
     
-    GMainLoop *main_loop;
     g_debug ("Create new main loop...");
-    main_loop = g_main_loop_new (NULL, FALSE);
+    GMainLoop *main_loop = g_main_loop_new (NULL, FALSE);
 
     // Initialize sub-systems
     g_thread_init (NULL);
@@ -244,7 +272,7 @@ main (int argc, char **argv)
     g_debug ("Initializing gstreamer sub-system...");
     gstreamer_init (main_loop);
 
-    int rc = gupnp_init (xmlFolder);
+    int rc = gupnp_init (fileName, xmlFolder);
     if (rc != 0)
     {
         g_printerr ("GUPnP initialization failed!");
@@ -288,6 +316,8 @@ main (int argc, char **argv)
     g_object_unref (dev);
     g_object_unref (context);
 
+    g_free (hostName);
+    
     g_debug ("Exiting...");
     return EXIT_SUCCESS;
 }

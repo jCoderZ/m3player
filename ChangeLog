@@ -1,0 +1,54 @@
+2011-07-25 22:50  mrumpf
+
+	* [r59] TODO.tasks: Added items
+
+2011-07-24 22:05  mrumpf
+
+	* [r55] src/last_change.c, src/last_change.h: Fixed compile error
+	  under OpenWRT
+
+2011-07-24 21:54  mrumpf
+
+	* [r53] src/m3ddity-player.c: Added include to make the code
+	  compile under OpenWRT
+
+2011-07-24 13:15  mrumpf
+
+	* [r46] Makefile.am, src/Makefile.am, src/Makefile.in[DEL]: Make
+	  the program installable
+
+2011-07-24 12:49  mrumpf
+
+	* [r41] gupnp-audio-renderer.anjuta[DEL], m3ddity-player.anjuta:
+	  Fixed name
+
+2011-07-24 12:49  mrumpf
+
+	* [r40] src/Makefile.in, src/audio-renderer.c[DEL],
+	  src/m3ddity-player.c: Fixed name
+
+2011-07-24 12:48  mrumpf
+
+	* [r39] configure.ac, src/Makefile.am, src/audio-renderer.c,
+	  src/run.sh: Fixed name
+
+2011-07-24 09:15  mrumpf
+
+	* [r19] .[CPY]: Renamed player project
+
+2011-07-17 16:26  mrumpf
+
+	* [r7] Ignore generated files
+
+2011-07-17 16:00  mrumpf
+
+	* [r6]
+
+2011-07-17 16:00  mrumpf
+
+	* [r5] Moved stuff, accidentally imported into the wrong folder.
+
+2011-07-17 15:58  mrumpf
+
+	* [r4] Added project folder
+
