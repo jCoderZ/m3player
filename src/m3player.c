@@ -16,7 +16,12 @@
  */
 
 #include <gst/gst.h>
+#include <stdio.h>
+#include <errno.h>
+#include <signal.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "renderingcontrol.h"
 #include "connectionmanager.h"
@@ -37,23 +42,28 @@ GUPnPService *avTransportService;
 
  */
 
-static const gchar *CONFIG_FILE_DEFAULT = "/etc/m3player/m3player.ini";
+#define CONFIG_FILE_DEFAULT "/etc/m3player/m3player.ini"
+#define PID_FILE_DEFAULT "/var/run/m3player.pid"
+#define XML_FOLDER_DEFAULT "/usr/share/m3player"
+#define ROOT_FILE_DEFAULT "MediaRendererV1.xml"
+#define LOG_FILE_DEFAULT "/var/log/m3player.log"
 static const gchar *configFile = NULL;
-static const gchar *PID_FILE_DEFAULT = "/var/run/m3player.pid";
 static const gchar *pidFile = NULL;
-static const gchar *XML_FOLDER_DEFAULT = "/usr/share/m3player";
 static const gchar *xmlFolder = NULL;
-static const gchar *FILE_NAME_DEFAULT = "MediaRendererV1.xml";
-static const gchar *fileName = NULL;
+static const gchar *rootFile = NULL;
+static const gchar *logFile = NULL;
 static gchar *hostName = NULL;
+static gint makeDaemon = 0;
 
 static GOptionEntry entries[] =
 {
-  { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file", NULL },
-  { "pidfile", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file", NULL },
-  { "xmlfolder", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file", NULL },
-  { "name", 'n', 0, G_OPTION_ARG_STRING, &hostName, "The name of the player instance", NULL },
-  { "filename", 'f', 0, G_OPTION_ARG_STRING, &fileName, "The name of the root device file", NULL },
+  { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file (Default: " CONFIG_FILE_DEFAULT ")", NULL },
+  { "pid", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file (Default: " PID_FILE_DEFAULT ")", NULL },
+  { "xml", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file (Default: " XML_FOLDER_DEFAULT ")", NULL },
+  { "name", 'n', 0, G_OPTION_ARG_STRING, &hostName, "The name of the player instance (Default: HOSTNAME)", NULL },
+  { "root", 'r', 0, G_OPTION_ARG_STRING, &rootFile, "The name of the root device file (Default: " ROOT_FILE_DEFAULT ")", NULL },
+  { "log", 'l', 0, G_OPTION_ARG_STRING, &logFile, "The name of the log file (Default: " LOG_FILE_DEFAULT ")", NULL },
+  { "daemonise", 'd', 0, G_OPTION_ARG_NONE, &makeDaemon, "Fork the player as daemon", NULL },
   { NULL }
 };
 
@@ -85,21 +95,6 @@ presets_signal_handler (int sig)
     //set_relative_counter_position (NULL, );
     //set_absolute_counter_position (NULL, );
 }
-
-void
-write_pid_file (const gchar *pidfile)
-{
-    FILE *file;
-    pid_t pid;
-    pid = getpid ();
-    file = fopen (pidfile, "w");
-    if (file)
-    {
-        fprintf (file,"%d", pid);
-        fclose (file); 
-    }
-}
-
 
 gint
 gupnp_init (const gchar* fileName, const gchar *xmlFolder)
@@ -179,9 +174,115 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder)
     return EXIT_SUCCESS;
 }
 
-int
-main (int argc, char **argv)
+void die(const char *format, ...) {
+    //printf(format);
+    exit (1);
+}
+
+/*
+   Cause a process to become a daemon
+   http://www.microhowto.info/howto/cause_a_process_to_become_a_daemon.html
+ */
+void daemonise()
 {
+    printf("Daemonizing process...\n");
+
+    // already a daemon
+    int ppid = getppid();
+	if(ppid == 1) {
+        die("we are already a daemon (%d)", ppid);
+    }
+
+    // Fork, allowing the parent process to terminate.
+    pid_t pid = fork();
+    if (pid == -1) {
+        die("failed to fork while daemonising (errno=%d)",errno);
+    } else if (pid != 0) {
+        _exit(0);
+    }
+
+    // Start a new session for the daemon.
+    if (setsid()==-1) {
+        die("failed to become a session leader while daemonising(errno=%d)",errno);
+    }
+
+    // Fork again, allowing the parent process to terminate.
+    signal(SIGHUP,SIG_IGN);
+    pid=fork();
+    if (pid == -1) {
+        die("failed to fork while daemonising (errno=%d)",errno);
+    } else if (pid != 0) {
+        _exit(0);
+    }
+
+    // Set the current working directory to the root directory.
+    if (chdir("/") == -1) {
+        die("failed to change working directory while daemonising (errno=%d)",errno);
+    }
+
+    // Set the user file creation mask to zero.
+    umask(0);
+
+    // Close then reopen standard file descriptors.
+    close(STDIN_FILENO);
+    if (open("/dev/null",O_RDONLY) == -1) {
+        die("failed to reopen stdin while daemonising (errno=%d)",errno);
+    }
+    int logfile_fileno = open(logFile,O_RDWR|O_CREAT|O_APPEND,S_IRUSR|S_IWUSR|S_IRGRP);
+    if (logfile_fileno == -1) {
+        die("failed to open logfile (errno=%d)",errno);
+    }
+    dup2(logfile_fileno,STDOUT_FILENO);
+    dup2(logfile_fileno,STDERR_FILENO);
+    close(logfile_fileno);
+/*
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+    if (open("/dev/null",O_RDONLY) == -1) {
+        die("failed to reopen stdin while daemonising (errno=%d)",errno);
+    }
+    if (open("/dev/null",O_WRONLY) == -1) {
+        die("failed to reopen stdout while daemonising (errno=%d)",errno);
+    }
+    if (open("/dev/null",O_RDWR) == -1) {
+        die("failed to reopen stderr while daemonising (errno=%d)",errno);
+    }
+*/
+/*
+    printf("Writing lock file...\n");
+    // change running directory
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+	int lfp = open(LOCK_FILE, O_RDWR | O_CREAT | O_TRUNC, mode);
+	if (lfp < 0) {
+        printf("Cannot open...\n");
+        exit(1); // can not open
+    }
+	if (lockf(lfp, F_TLOCK, 0) < 0) {
+        printf("Cannot lock...\n");
+        exit(0); // can not lock
+    }
+
+	// first instance continues
+    char str[10];
+	sprintf(str,"%d\n", getpid());
+    // record pid to lockfile
+	i = write(lfp, str, strlen(str));
+    if (i == -1) {
+        printf("Write failed...\n");
+        exit (3);  // write failed
+    }
+*/
+    printf("Ignoring signals...\n");
+    // ignore child
+    signal(SIGCHLD,SIG_IGN);
+    // ignore tty signals
+	signal(SIGTSTP,SIG_IGN);
+	signal(SIGTTOU,SIG_IGN);
+	signal(SIGTTIN,SIG_IGN);
+}
+
+void handleParameters(int argc, char **argv) {
     // Parse command line
     GError *optionError = NULL;
     GOptionContext *context;
@@ -207,17 +308,23 @@ main (int argc, char **argv)
     }
     g_debug ("Setting XML folder to %s", xmlFolder);
 
-    if (fileName == NULL)
+    if (rootFile == NULL)
     {
-        fileName = FILE_NAME_DEFAULT;
+        rootFile = ROOT_FILE_DEFAULT;
     }
-    g_debug ("Setting filename to %s", fileName);
+    g_debug ("Setting rootFile to %s", rootFile);
 
     if (pidFile == NULL)
     {
         pidFile = PID_FILE_DEFAULT;
     }
-    g_debug ("Setting PID file to %s", pidFile);
+    g_debug ("Setting pid file to %s", pidFile);
+
+    if (logFile == NULL)
+    {
+        logFile = LOG_FILE_DEFAULT;
+    }
+    g_debug ("Setting log file to %s", logFile);
 
     if (!hostName)
     {
@@ -232,6 +339,8 @@ main (int argc, char **argv)
         }
     }
     g_debug ("Setting hostname default: %s", hostName);
+
+    g_debug ("Daemonise? %d", makeDaemon);
 
     // Load ini file
     if (g_file_test (configFile, G_FILE_TEST_EXISTS)) 
@@ -258,10 +367,17 @@ main (int argc, char **argv)
         g_printerr ("Specified XML folder does not exist: %s\n", xmlFolder);
         exit (4);
     }
+}
 
-    // Write the pid file
-    write_pid_file (pidFile);
-    
+int
+main (int argc, char **argv)
+{
+    handleParameters(argc, argv);
+
+    if (makeDaemon) {
+        daemonise();
+    }
+        
     g_debug ("Create new main loop...");
     GMainLoop *main_loop = g_main_loop_new (NULL, FALSE);
 
@@ -272,7 +388,7 @@ main (int argc, char **argv)
     g_debug ("Initializing gstreamer sub-system...");
     gstreamer_init (main_loop);
 
-    int rc = gupnp_init (fileName, xmlFolder);
+    int rc = gupnp_init (rootFile, xmlFolder);
     if (rc != 0)
     {
         g_printerr ("GUPnP initialization failed!");
