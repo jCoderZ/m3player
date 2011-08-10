@@ -29,6 +29,14 @@
 #include "presets.h"
 #include "gstreamer.h"
 
+#define die(_fmt, ...)  printf(_fmt, __VA_ARGS__)
+
+#define CONFIG_FILE_DEFAULT "/etc/m3player/m3player.ini"
+#define PID_FILE_DEFAULT "/var/run/m3player.pid"
+#define XML_FOLDER_DEFAULT "/usr/share/m3player"
+#define ROOT_FILE_DEFAULT "MediaRendererV1.xml"
+#define LOG_FILE_DEFAULT "/var/log/m3player.log"
+
 GUPnPContext *context;
 GUPnPRootDevice *dev;
 
@@ -42,16 +50,12 @@ GUPnPService *avTransportService;
 
  */
 
-#define CONFIG_FILE_DEFAULT "/etc/m3player/m3player.ini"
-#define PID_FILE_DEFAULT "/var/run/m3player.pid"
-#define XML_FOLDER_DEFAULT "/usr/share/m3player"
-#define ROOT_FILE_DEFAULT "MediaRendererV1.xml"
-#define LOG_FILE_DEFAULT "/var/log/m3player.log"
 static const gchar *configFile = NULL;
 static const gchar *pidFile = NULL;
 static const gchar *xmlFolder = NULL;
 static const gchar *rootFile = NULL;
 static const gchar *logFile = NULL;
+static const gchar *interface = NULL;
 static gchar *hostName = NULL;
 static gint makeDaemon = 0;
 
@@ -63,6 +67,7 @@ static GOptionEntry entries[] =
   { "name", 'n', 0, G_OPTION_ARG_STRING, &hostName, "The name of the player instance (Default: HOSTNAME)", NULL },
   { "root", 'r', 0, G_OPTION_ARG_STRING, &rootFile, "The name of the root device file (Default: " ROOT_FILE_DEFAULT ")", NULL },
   { "log", 'l', 0, G_OPTION_ARG_STRING, &logFile, "The name of the log file (Default: " LOG_FILE_DEFAULT ")", NULL },
+  { "interface", 'i', 0, G_OPTION_ARG_STRING, &interface, "The name/IP of the interface the process is bound to", NULL },
   { "daemonise", 'd', 0, G_OPTION_ARG_NONE, &makeDaemon, "Fork the player as daemon", NULL },
   { NULL }
 };
@@ -174,18 +179,14 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder)
     return EXIT_SUCCESS;
 }
 
-void die(const char *format, ...) {
-    //printf(format);
-    exit (1);
-}
-
 /*
    Cause a process to become a daemon
    http://www.microhowto.info/howto/cause_a_process_to_become_a_daemon.html
  */
-void daemonise()
+void
+daemonise()
 {
-    printf("Daemonizing process...\n");
+    g_debug ("Daemonizing process...");
 
     // already a daemon
     int ppid = getppid();
@@ -235,45 +236,7 @@ void daemonise()
     dup2(logfile_fileno,STDOUT_FILENO);
     dup2(logfile_fileno,STDERR_FILENO);
     close(logfile_fileno);
-/*
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
-    if (open("/dev/null",O_RDONLY) == -1) {
-        die("failed to reopen stdin while daemonising (errno=%d)",errno);
-    }
-    if (open("/dev/null",O_WRONLY) == -1) {
-        die("failed to reopen stdout while daemonising (errno=%d)",errno);
-    }
-    if (open("/dev/null",O_RDWR) == -1) {
-        die("failed to reopen stderr while daemonising (errno=%d)",errno);
-    }
-*/
-/*
-    printf("Writing lock file...\n");
-    // change running directory
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-	int lfp = open(LOCK_FILE, O_RDWR | O_CREAT | O_TRUNC, mode);
-	if (lfp < 0) {
-        printf("Cannot open...\n");
-        exit(1); // can not open
-    }
-	if (lockf(lfp, F_TLOCK, 0) < 0) {
-        printf("Cannot lock...\n");
-        exit(0); // can not lock
-    }
 
-	// first instance continues
-    char str[10];
-	sprintf(str,"%d\n", getpid());
-    // record pid to lockfile
-	i = write(lfp, str, strlen(str));
-    if (i == -1) {
-        printf("Write failed...\n");
-        exit (3);  // write failed
-    }
-*/
-    printf("Ignoring signals...\n");
     // ignore child
     signal(SIGCHLD,SIG_IGN);
     // ignore tty signals
@@ -282,8 +245,10 @@ void daemonise()
 	signal(SIGTTIN,SIG_IGN);
 }
 
-void handleParameters(int argc, char **argv) {
-    // Parse command line
+void
+handleParameters(int argc, char **argv) {
+    g_debug ("Parsing command line...");
+
     GError *optionError = NULL;
     GOptionContext *context;
     context = g_option_context_new ("m3player");
@@ -338,7 +303,7 @@ void handleParameters(int argc, char **argv) {
             hostName = g_strdup ("m3player");
         }
     }
-    g_debug ("Setting hostname default: %s", hostName);
+    g_debug ("Setting hostname to: %s", hostName);
 
     g_debug ("Daemonise? %d", makeDaemon);
 
