@@ -60,7 +60,7 @@ static GOptionEntry entries[] = {
   { "name", 'n', 0, G_OPTION_ARG_STRING, &hostName, "The name of the player instance (Default: HOSTNAME)", NULL },
   { "root", 'r', 0, G_OPTION_ARG_STRING, &rootFile, "The name of the root device file (Default: " ROOT_FILE_DEFAULT ")", NULL },
   { "log", 'l', 0, G_OPTION_ARG_STRING, &logFile, "The name of the log file (Default: " LOG_FILE_DEFAULT ")", NULL },
-  { "interface", 'i', 0, G_OPTION_ARG_STRING, &interface, "The name/IP of the interface the process is bound to", NULL },
+  { "interface", 'i', 0, G_OPTION_ARG_STRING, &interface, "The name of the interface the process is bound to (e.g. eth0)", NULL },
   { "daemonise", 'd', 0, G_OPTION_ARG_NONE, &makeDaemon, "Fork the player as daemon", NULL },
   { NULL }
 };
@@ -95,8 +95,8 @@ presets_signal_handler (int sig) {
 gint
 gupnp_init (const gchar* fileName, const gchar *xmlFolder) {
     GError *error = NULL;
-    g_debug ("Create the UPnP context");
-    context = gupnp_context_new (NULL, NULL, 0, &error);
+    g_debug ("Create the UPnP context (interface: %s)", interface);
+    context = gupnp_context_new (NULL, interface, 0, &error);
     if (error) {
         g_printerr ("Error creating the GUPnP context: %s", error->message);
         g_error_free (error);
