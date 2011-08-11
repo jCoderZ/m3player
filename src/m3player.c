@@ -37,18 +37,12 @@
 #define ROOT_FILE_DEFAULT "MediaRendererV1.xml"
 #define LOG_FILE_DEFAULT "/var/log/m3player.log"
 
-GUPnPContext *context;
-GUPnPRootDevice *dev;
+static GUPnPContext *context;
+static GUPnPRootDevice *dev;
 
-GUPnPService *connectionManagerService;
-GUPnPService *renderingControlService;
-GUPnPService *avTransportService;
-
-/*
-
-   ...
-
- */
+static GUPnPService *connectionManagerService;
+static GUPnPService *renderingControlService;
+static GUPnPService *avTransportService;
 
 static const gchar *configFile = NULL;
 static const gchar *pidFile = NULL;
@@ -59,8 +53,7 @@ static const gchar *interface = NULL;
 static gchar *hostName = NULL;
 static gint makeDaemon = 0;
 
-static GOptionEntry entries[] =
-{
+static GOptionEntry entries[] = {
   { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file (Default: " CONFIG_FILE_DEFAULT ")", NULL },
   { "pid", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file (Default: " PID_FILE_DEFAULT ")", NULL },
   { "xml", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file (Default: " XML_FOLDER_DEFAULT ")", NULL },
@@ -76,14 +69,12 @@ static GKeyFile *iniFile = NULL;
 
 
 void
-presets_signal_handler (int sig) 
-{
+presets_signal_handler (int sig) {
     gchar *url = presets_next();
     g_debug("Next station: '%s'", url);
     gstreamer_set_uri (url);
     gstreamer_play ();
 
-    
     set_transport_state (NULL, PLAYING);
     set_transport_status (NULL, OK);
     set_current_media_category (NULL, TRACK_UNAWARE);
@@ -102,13 +93,11 @@ presets_signal_handler (int sig)
 }
 
 gint
-gupnp_init (const gchar* fileName, const gchar *xmlFolder)
-{
+gupnp_init (const gchar* fileName, const gchar *xmlFolder) {
     GError *error = NULL;
     g_debug ("Create the UPnP context");
     context = gupnp_context_new (NULL, NULL, 0, &error);
-    if (error) 
-    {
+    if (error) {
         g_printerr ("Error creating the GUPnP context: %s", error->message);
         g_error_free (error);
 
@@ -131,8 +120,7 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder)
         return EXIT_FAILURE;
     }
     gupnp_service_signals_autoconnect (GUPNP_SERVICE (connectionManagerService), NULL, &error);
-    if (error)
-    {
+    if (error) {
         g_printerr ("Could not autoconnect signals: %s", error->message);
         g_error_free (error);
 
@@ -148,8 +136,7 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder)
         return EXIT_FAILURE;
     }
     gupnp_service_signals_autoconnect (GUPNP_SERVICE (renderingControlService), NULL, &error);
-    if (error)
-    {
+    if (error) {
         g_printerr ("Could not autoconnect signals: %s", error->message);
         g_error_free (error);
 
@@ -165,8 +152,7 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder)
         return EXIT_FAILURE;
     }
     gupnp_service_signals_autoconnect (GUPNP_SERVICE (avTransportService), NULL, &error);
-    if (error)
-    {
+    if (error) {
         g_printerr ("Could not autoconnect signals: %s", error->message);
         g_error_free (error);
 
@@ -184,10 +170,7 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder)
    http://www.microhowto.info/howto/cause_a_process_to_become_a_daemon.html
  */
 void
-daemonise()
-{
-    g_debug ("Daemonizing process...");
-
+daemonise() {
     // already a daemon
     int ppid = getppid();
 	if(ppid == 1) {
@@ -229,6 +212,7 @@ daemonise()
     if (open("/dev/null",O_RDONLY) == -1) {
         die("failed to reopen stdin while daemonising (errno=%d)",errno);
     }
+
     int logfile_fileno = open(logFile,O_RDWR|O_CREAT|O_APPEND,S_IRUSR|S_IWUSR|S_IRGRP);
     if (logfile_fileno == -1) {
         die("failed to open logfile (errno=%d)",errno);
@@ -247,101 +231,84 @@ daemonise()
 
 void
 handleParameters(int argc, char **argv) {
-    g_debug ("Parsing command line...");
-
     GError *optionError = NULL;
     GOptionContext *context;
     context = g_option_context_new ("m3player");
     g_option_context_add_main_entries (context, entries, NULL);
-    if (!g_option_context_parse (context, &argc, &argv, &optionError))
-    {
+    if (!g_option_context_parse (context, &argc, &argv, &optionError)) {
         g_printerr ("option parsing failed: %s\n", optionError->message);
         g_error_free (optionError);
         exit (1);
     }
     
     // Set defaults in case no command-line parameter has been given
-    if (configFile == NULL)
-    {
+    if (configFile == NULL) {
         configFile = CONFIG_FILE_DEFAULT;
     }
-    g_debug ("Setting configFile to %s", configFile);
 
-    if (xmlFolder == NULL)
-    {
+    if (xmlFolder == NULL) {
         xmlFolder = XML_FOLDER_DEFAULT;
     }
-    g_debug ("Setting XML folder to %s", xmlFolder);
 
-    if (rootFile == NULL)
-    {
+    if (rootFile == NULL) {
         rootFile = ROOT_FILE_DEFAULT;
     }
-    g_debug ("Setting rootFile to %s", rootFile);
 
-    if (pidFile == NULL)
-    {
+    if (pidFile == NULL) {
         pidFile = PID_FILE_DEFAULT;
     }
-    g_debug ("Setting pid file to %s", pidFile);
 
-    if (logFile == NULL)
-    {
+    if (logFile == NULL) {
         logFile = LOG_FILE_DEFAULT;
     }
-    g_debug ("Setting log file to %s", logFile);
 
-    if (!hostName)
-    {
+    if (!hostName) {
         gchar host[HOST_NAME_MAX];
-        if (gethostname(host, HOST_NAME_MAX) == 0)
-        {
+        if (gethostname(host, HOST_NAME_MAX) == 0) {
             hostName = g_strdup (host);
         }
-        else
-        {
+        else {
             hostName = g_strdup ("m3player");
         }
     }
-    g_debug ("Setting hostname to: %s", hostName);
-
-    g_debug ("Daemonise? %d", makeDaemon);
 
     // Load ini file
-    if (g_file_test (configFile, G_FILE_TEST_EXISTS)) 
-    {
+    if (g_file_test (configFile, G_FILE_TEST_EXISTS)) {
         GError *iniError = NULL;
-        g_debug("Reading config file: %s", configFile);
         iniFile = g_key_file_new ();
-        if (!g_key_file_load_from_file (iniFile, configFile, G_KEY_FILE_NONE, &iniError))
-        {
+        if (!g_key_file_load_from_file (iniFile, configFile, G_KEY_FILE_NONE, &iniError)) {
             g_printerr ("reading ini file failed! %s\n", iniError->message);
             g_error_free (iniError);
             exit (2);
         }
     }
-    else
-    {
+    else {
         g_printerr ("Specified config file does not exist: %s\n", configFile);
         exit (3);
     }
 
     // Test whether the xml folder exists
-    if (!g_file_test (xmlFolder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
-    {
+    if (!g_file_test (xmlFolder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
         g_printerr ("Specified XML folder does not exist: %s\n", xmlFolder);
         exit (4);
     }
 }
 
 int
-main (int argc, char **argv)
-{
+main (int argc, char **argv) {
     handleParameters(argc, argv);
 
     if (makeDaemon) {
         daemonise();
     }
+
+    g_debug ("Configuration file: %s", configFile);
+    g_debug ("XML folder: %s", xmlFolder);
+    g_debug ("Root device file: %s", rootFile);
+    g_debug ("PID file: %s", pidFile);
+    g_debug ("Log file: %s", logFile);
+    g_debug ("hostname: %s", hostName);
+    g_debug ("Daemonise: %d", makeDaemon);
         
     g_debug ("Create new main loop...");
     GMainLoop *main_loop = g_main_loop_new (NULL, FALSE);
@@ -354,8 +321,7 @@ main (int argc, char **argv)
     gstreamer_init (main_loop);
 
     int rc = gupnp_init (rootFile, xmlFolder);
-    if (rc != 0)
-    {
+    if (rc != 0) {
         g_printerr ("GUPnP initialization failed!");
         return rc;
     }
@@ -367,15 +333,13 @@ main (int argc, char **argv)
     presets_init (presets_signal_handler, iniFile);
     g_debug ("Setting next preset...");
     gchar *url = presets_next ();
-    if (url)
-    {
+    if (url) {
         g_debug ("Setting url %s", url);
         gstreamer_set_uri (url);
         g_debug ("Playing...");
         gstreamer_play ();
     }
-    else
-    {
+    else {
         g_debug ("No preset!");
     }
     
