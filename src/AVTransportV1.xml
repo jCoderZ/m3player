@@ -371,7 +371,7 @@
       <allowedValueList>
         <allowedValue>OK</allowedValue>
         <allowedValue>ERROR_OCCURRED</allowedValue>
-        <allowedValue> vendor-defined </allowedValue>
+        <!-- allowedValue> vendor-defined </allowedValue -->
       </allowedValueList>
     </stateVariable>
     <stateVariable sendEvents="no">
@@ -410,7 +410,7 @@
         <allowedValue>NETWORK</allowedValue>
         <allowedValue>NONE</allowedValue>
         <allowedValue>NOT_IMPLEMENTED</allowedValue>
-        <allowedValue> vendor-defined </allowedValue>
+        <!-- allowedValue> vendor-defined </allowedValue -->
       </allowedValueList>
     </stateVariable>
     <stateVariable sendEvents="no">
@@ -449,7 +449,7 @@
         <allowedValue>NETWORK</allowedValue>
         <allowedValue>NONE</allowedValue>
         <allowedValue>NOT_IMPLEMENTED</allowedValue>
-        <allowedValue> vendor-defined </allowedValue>
+        <!-- allowedValue> vendor-defined </allowedValue -->
       </allowedValueList>
     </stateVariable>
     <stateVariable sendEvents="no">
@@ -479,7 +479,7 @@
       <dataType>string</dataType>
       <allowedValueList>
         <allowedValue>1</allowedValue>
-        <allowedValue> vendor-defined </allowedValue>
+        <!-- allowedValue> vendor-defined </allowedValue -->
       </allowedValueList>
     </stateVariable>
     <stateVariable sendEvents="no">
@@ -504,7 +504,7 @@
         <allowedValue>1:MEDIUM</allowedValue>
         <allowedValue>2:HIGH</allowedValue>
         <allowedValue>NOT_IMPLEMENTED</allowedValue>
-        <allowedValue> vendor-defined </allowedValue>
+        <!-- allowedValue> vendor-defined </allowedValue -->
       </allowedValueList>
     </stateVariable>
     <stateVariable sendEvents="no">
@@ -516,7 +516,8 @@
       <dataType>ui4</dataType>
       <allowedValueRange>
         <minimum>0</minimum>
-        <maximum> vendor-defined </maximum>
+        <maximum>4294967295</maximum>
+        <!-- maximum> vendor-defined </maximum -->
       </allowedValueRange>
     </stateVariable>
     <stateVariable sendEvents="no">
@@ -524,7 +525,8 @@
       <dataType>ui4</dataType>
       <allowedValueRange>
         <minimum>0</minimum>
-        <maximum> vendor-defined </maximum>
+        <maximum>4294967295</maximum>
+        <!-- maximum> vendor-defined </maximum -->
         <step>1</step>
       </allowedValueRange>
     </stateVariable>

@@ -8,14 +8,14 @@
   <device>
     <deviceType>urn:schemas-upnp-org:device:MediaRenderer:2</deviceType>
     <friendlyName>m3ddity player - m3player</friendlyName>
-    <manufacturer>jCoderZ.org</manufacturer>
-    <modelName>m3player - VERSION</modelName>
+    <manufacturer>jCoderZ</manufacturer>
+    <manufacturerURL>http://www.jcoderz.org/m3dditiez/</manufacturerURL>
+    <modelName>m3player</modelName>
+    <modelNumber>@VERSION@</modelNumber>
+    <modelURL>http://www.jcoderz.org/m3dditiez/wiki/m3ddity-player/</modelURL>
     <UDN>uuid:a2b641be-9543-11e0-bd20-001966f2c8ac</UDN>
     <!--
-    <manufacturerURL>http://michael.rumpfonline.de</manufacturerURL>
     <modelDescription></modelDescription>
-    <modelNumber>V1.0</modelNumber>
-    <modelURL>URL to model site</modelURL>
     <serialNumber>1234567890</serialNumber>
     <UPC>Universal Product Code</UPC>
     <iconList>

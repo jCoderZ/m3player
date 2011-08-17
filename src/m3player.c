@@ -34,7 +34,7 @@
 #define CONFIG_FILE_DEFAULT "/etc/m3player/m3player.ini"
 #define PID_FILE_DEFAULT "/var/run/m3player.pid"
 #define XML_FOLDER_DEFAULT "/usr/share/m3player"
-#define ROOT_FILE_DEFAULT "MediaRendererV1.xml"
+#define ROOT_FILE_DEFAULT "MediaRendererV2.xml"
 #define LOG_FILE_DEFAULT "/var/log/m3player.log"
 
 static GUPnPContext *context;
@@ -108,12 +108,16 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder) {
     g_debug ("Create root device");
     dev = gupnp_root_device_new (context, fileName, xmlFolder);
 
+    char devInfo[256];
+    const char *ver1 = strstr(fileName, "V1");
+
     g_debug ("Announce root device");
     gupnp_root_device_set_available (dev, TRUE);
 
-    g_debug ("Get the connection manager service");
+    g_debug ("Get the connection manager service V%d", (ver1 ? 1 : 2));
+    sprintf(devInfo, "urn:schemas-upnp-org:service:ConnectionManager:%d", (ver1 ? 1 : 2));
     connectionManagerService = GUPNP_SERVICE(gupnp_device_info_get_service
-        (GUPNP_DEVICE_INFO (dev), "urn:schemas-upnp-org:service:ConnectionManager:1"));
+        (GUPNP_DEVICE_INFO (dev), devInfo));
     if (!connectionManagerService) {
         g_printerr ("Cannot get ConnectionManager service");
 
@@ -127,9 +131,10 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder) {
         return EXIT_FAILURE;
     }
 
-    g_debug ("Get the rendering control service");
+    g_debug ("Get the rendering control service V%d", (ver1 ? 1 : 2));
+    sprintf(devInfo, "urn:schemas-upnp-org:service:RenderingControl:%d", (ver1 ? 1 : 2));
     renderingControlService = GUPNP_SERVICE(gupnp_device_info_get_service
-        (GUPNP_DEVICE_INFO (dev), "urn:schemas-upnp-org:service:RenderingControl:1"));
+        (GUPNP_DEVICE_INFO (dev), devInfo));
     if (!renderingControlService) {
         g_printerr ("Cannot get RenderingControl service");
 
@@ -143,9 +148,10 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder) {
         return EXIT_FAILURE;
     }
     
-    g_debug ("Get the av transport service");
+    g_debug ("Get the av transport service V%d", (ver1 ? 1 : 2));
+    sprintf(devInfo, "urn:schemas-upnp-org:service:AVTransport:%d", (ver1 ? 1 : 2));
     avTransportService = GUPNP_SERVICE(gupnp_device_info_get_service
-        (GUPNP_DEVICE_INFO (dev), "urn:schemas-upnp-org:service:AVTransport:1"));
+        (GUPNP_DEVICE_INFO (dev), devInfo));
     if (!avTransportService) {
         g_printerr ("Cannot get AVTransport service");
 
