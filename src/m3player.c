@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - Michael Rumpf
+ * Copyright (C) 2011 - jCoderz.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <glib/gprintf.h>
+#include <glib/gstdio.h>
+#include <alsa/asoundlib.h>
 
 #include "renderingcontrol.h"
 #include "connectionmanager.h"
@@ -29,11 +32,14 @@
 #include "presets.h"
 #include "gstreamer.h"
 
+#define VERSION "0.1.3"
+
 #define die(_fmt, ...)  printf(_fmt, __VA_ARGS__)
 
 #define CONFIG_FILE_DEFAULT "/etc/m3player/m3player.ini"
 #define PID_FILE_DEFAULT "/var/run/m3player.pid"
-#define XML_FOLDER_DEFAULT "/usr/share/m3player"
+#define XML_SOURCE_FOLDER_DEFAULT "/usr/share/m3player"
+#define XML_TARGET_FOLDER_DEFAULT "/var/lib/m3player"
 #define ROOT_FILE_DEFAULT "MediaRendererV2.xml"
 #define LOG_FILE_DEFAULT "/var/log/m3player.log"
 
@@ -46,7 +52,8 @@ static GUPnPService *avTransportService;
 
 static const gchar *configFile = NULL;
 static const gchar *pidFile = NULL;
-static const gchar *xmlFolder = NULL;
+static const gchar *xmlSource = NULL;
+static const gchar *xmlTarget = NULL;
 static const gchar *rootFile = NULL;
 static const gchar *logFile = NULL;
 static const gchar *interface = NULL;
@@ -56,7 +63,8 @@ static gint makeDaemon = 0;
 static GOptionEntry entries[] = {
   { "config", 'c', 0, G_OPTION_ARG_STRING, &configFile, "Path to the config file (Default: " CONFIG_FILE_DEFAULT ")", NULL },
   { "pid", 'p', 0, G_OPTION_ARG_STRING, &pidFile, "Path to the pid file (Default: " PID_FILE_DEFAULT ")", NULL },
-  { "xml", 'x', 0, G_OPTION_ARG_STRING, &xmlFolder, "Path to the XML folder file (Default: " XML_FOLDER_DEFAULT ")", NULL },
+  { "xmlsource", 's', 0, G_OPTION_ARG_STRING, &xmlSource, "Path to the XML source folder (Default: " XML_SOURCE_FOLDER_DEFAULT ")", NULL },
+  { "xmltarget", 't', 0, G_OPTION_ARG_STRING, &xmlTarget, "Path to the XML target folder (Default: " XML_TARGET_FOLDER_DEFAULT ")", NULL },
   { "name", 'n', 0, G_OPTION_ARG_STRING, &hostName, "The name of the player instance (Default: HOSTNAME)", NULL },
   { "root", 'r', 0, G_OPTION_ARG_STRING, &rootFile, "The name of the root device file (Default: " ROOT_FILE_DEFAULT ")", NULL },
   { "log", 'l', 0, G_OPTION_ARG_STRING, &logFile, "The name of the log file (Default: " LOG_FILE_DEFAULT ")", NULL },
@@ -252,8 +260,12 @@ handleParameters(int argc, char **argv) {
         configFile = CONFIG_FILE_DEFAULT;
     }
 
-    if (xmlFolder == NULL) {
-        xmlFolder = XML_FOLDER_DEFAULT;
+    if (xmlSource == NULL) {
+        xmlSource = XML_SOURCE_FOLDER_DEFAULT;
+    }
+
+    if (xmlTarget == NULL) {
+        xmlTarget = XML_TARGET_FOLDER_DEFAULT;
     }
 
     if (rootFile == NULL) {
@@ -294,10 +306,168 @@ handleParameters(int argc, char **argv) {
     }
 
     // Test whether the xml folder exists
-    if (!g_file_test (xmlFolder, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-        g_printerr ("Specified XML folder does not exist: %s\n", xmlFolder);
+    if (!g_file_test (xmlSource, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+        g_printerr ("Specified XML folder does not exist: %s\n", xmlSource);
         exit (4);
     }
+}
+
+int
+filesystem_copy (const gchar* path_from, const gchar* path_to, const gchar *filename, GHashTable *ht)
+{
+    gint rc = 0;
+    FILE* f_from;
+    FILE* f_to;
+    gchar read_buf[1000+1];
+    gchar write_buf[1000+1];
+
+    g_debug ("Copying %s from %s to %s", filename, path_from, path_to);
+
+    gchar* source = g_build_filename (path_from, filename, NULL);
+    f_from = g_fopen(source, "r");
+    g_free (source);
+    if (!f_from) {
+    	g_printerr ("Cannot open source file");
+    	perror("fopen");
+    	rc = 1;
+    }
+
+    gchar* target = g_build_filename (path_to, filename, NULL);
+    f_to = g_fopen(target, "w+");
+    g_free (target);
+    if (!f_to) {
+    	g_printerr ("Cannot open target file");
+	    perror("fopen");
+    	rc = 2;
+    }
+
+    while (fgets(read_buf, 1000+1, f_from)) {
+
+        g_sprintf (write_buf, "%s", read_buf);
+        if (ht != NULL) {
+            gchar *start = g_strstr_len (read_buf, -1, "@");
+            if (start) {
+                gchar *end = g_strstr_len (start + 1, -1, "@");
+                if (end) {
+                    gchar* key = g_strndup (start + 1, (end - start - 1));
+                    const gchar *value = (const gchar *) g_hash_table_lookup (ht, key);
+                    start[0] = 0;
+                    g_sprintf (write_buf, "%s%s%s", read_buf, value, (end + 1));
+                    g_free (key);
+                }
+            }
+        }
+
+    	if (fputs(write_buf, f_to) == EOF) {
+    	    g_printerr ("Error writing to target file: ");
+    	    perror("fputs");
+    	    break;
+    	}
+    }
+
+    if (!feof(f_from)) {
+        g_printerr ("Error reading from source file: ");
+        perror ("feof");
+        rc = 3;
+    }
+
+    if (fclose(f_from) == EOF) {
+	    g_printerr ("Error when closing source file: ");
+    	perror("fclose");
+        rc = 4;
+    }
+    if (fclose(f_to) == EOF) {
+    	g_printerr ("Error when closing target file: ");
+	    perror("fclose");
+        rc = 5;
+    }
+    return rc;
+}
+
+
+/**
+ * This method creates the folders and copies/filters the XML files
+ * to the target folder.
+ */
+int
+filesystem_init ()
+{
+    GError *error = NULL;
+    if (g_file_test (xmlTarget, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+        GDir *dir = g_dir_open(xmlTarget, 0, &error);
+        if (error) {
+            g_printerr ("Could not open folder %s", xmlTarget);
+            return 1;
+        }
+        const gchar *name = NULL;
+        while ( (name = g_dir_read_name (dir)) ) {
+            gchar* file = g_build_filename (xmlTarget, name, NULL);
+            g_debug("Removing file %s", file);
+            if (g_unlink (file)) {
+                g_printerr ("Could not remove file %s", file);
+            }
+            g_free (file);
+        }
+        g_debug("Removing dir %s", xmlTarget);
+        g_rmdir (xmlTarget);
+    }
+
+    g_debug("Creating dir %s", xmlTarget);
+    if (g_mkdir_with_parents (xmlTarget, 0755) == -1) {
+        g_printerr ("Could not create folder %s", xmlTarget);
+        return 3;
+    }
+
+    GHashTable *ht = g_hash_table_new (g_str_hash, g_str_equal);
+    g_hash_table_insert (ht, "HOSTNAME", hostName);
+    g_hash_table_insert (ht, "VERSION", VERSION);
+
+    gint rc = 0;
+    const gchar *filename = "MediaRendererV1.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, ht)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 4;
+    }
+
+    filename = "MediaRendererV2.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, ht)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 5;
+    }
+    filename = "RenderingControlV1.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, NULL)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 6;
+    }
+    filename = "RenderingControlV2.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, NULL)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 7;
+    }
+    filename = "AVTransportV1.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, NULL)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 8;
+    }
+    filename = "AVTransportV2.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, NULL)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 9;
+    }
+    filename = "ConnectionManagerV1.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, NULL)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 10;
+    }
+    filename = "ConnectionManagerV2.xml";
+    if (filesystem_copy (xmlSource, xmlTarget, filename, NULL)) {
+        g_printerr("Copy of %s failed!", filename);
+        rc = 11;
+    }
+
+    g_hash_table_destroy (ht);
+
+    return rc;
 }
 
 int
@@ -308,14 +478,23 @@ main (int argc, char **argv) {
         daemonise();
     }
 
+    // log output starts after the daemon has been created
+    
     g_debug ("Configuration file: %s", configFile);
-    g_debug ("XML folder: %s", xmlFolder);
+    g_debug ("XML source folder: %s", xmlSource);
+    g_debug ("XML target folder: %s", xmlTarget);
     g_debug ("Root device file: %s", rootFile);
     g_debug ("PID file: %s", pidFile);
     g_debug ("Log file: %s", logFile);
     g_debug ("hostname: %s", hostName);
     g_debug ("Daemonise: %d", makeDaemon);
-        
+
+    int rc = 0;
+    if ( (rc = filesystem_init ()) ) {
+        g_printerr ("Could not initialize the file-system");
+        return rc;
+    }
+
     g_debug ("Create new main loop...");
     GMainLoop *main_loop = g_main_loop_new (NULL, FALSE);
 
@@ -326,7 +505,7 @@ main (int argc, char **argv) {
     g_debug ("Initializing gstreamer sub-system...");
     gstreamer_init (main_loop);
 
-    int rc = gupnp_init (rootFile, xmlFolder);
+    rc = gupnp_init (rootFile, xmlSource);
     if (rc != 0) {
         g_printerr ("GUPnP initialization failed!");
         return rc;
@@ -372,3 +551,29 @@ main (int argc, char **argv) {
     g_debug ("Exiting...");
     return EXIT_SUCCESS;
 }
+
+/*
+void SetAlsaMasterVolume(long volume)
+{
+    long min, max;
+    snd_mixer_t *handle;
+    snd_mixer_selem_id_t *sid;
+    const char *card = "default";
+    const char *selem_name = "Master";
+
+    snd_mixer_open(&handle, 0);
+    snd_mixer_attach(handle, card);
+    snd_mixer_selem_register(handle, NULL, NULL);
+    snd_mixer_load(handle);
+
+    snd_mixer_selem_id_alloca(&sid);
+    snd_mixer_selem_id_set_index(sid, 0);
+    snd_mixer_selem_id_set_name(sid, selem_name);
+    snd_mixer_elem_t* elem = snd_mixer_find_selem(handle, sid);
+
+    snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
+    snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
+
+    snd_mixer_close(handle);
+}
+*/

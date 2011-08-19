@@ -2,7 +2,7 @@
 
 export LD_LIBRARY_PATH=/home/micha/workspaces/upnp/gupnp/git/base/lib
 
-rm -f m3player.log
+rm -f *.log
 
-./m3player -c $(pwd)/m3player.ini -x $(pwd) -l $(pwd)/m3player.log $*
+./m3player -c $(pwd)/m3player.ini -l $(pwd)/m3player.log -s $(pwd) -t /tmp/m3player $*
 
