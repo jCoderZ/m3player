@@ -2,48 +2,8 @@
 <gtodo>
   <category title="Personal" place="0">
     <item>
-      <summary>GStreamer Bug</summary>
-      <comment>https://bugzilla.gnome.org/show_bug.cgi?id=653840</comment>
-    </item>
-    <item>
-      <summary>GStreamer M3U</summary>
-      <comment>GStreamer does not handle M3U files, but the file format is used
-      for webradio MP3 streams. That means we need to support it here.</comment>
-    </item>
-    <item>
-      <summary>UPnP Specification Versions</summary>
-      <comment>Support MediaRenderer version 1 and 2 at the same 
-      time!?</comment>
-    </item>
-    <item>
-      <summary>UPnP Specification</summary>
-      <comment>Implement the missing functionality: RenderingControl + 
-      AVTransport: GetMediainfo_Ext</comment>
-    </item>
-    <item>
-      <summary>Daemonize</summary>
-      <comment>Convert the application into a daemon (PID File, ...)</comment>
-    </item>
-    <item>
-      <summary>Packaging</summary>
-      <comment>Create Ubuntu and OpenWRT packages</comment>
-    </item>
-    <item>
-      <summary>Checkk Memory Management</summary>
-      <comment>I'm not sure whether all memory resources are 
-      freed-up again.</comment>
-    </item>
-    <item>
-      <summary>Control volume via mixer device</summary>
-      <comment>http://www.oreilly.de/catalog/multilinux/excerpt/ch14-07.htm</comment>
-    </item>
-    <item>
-      <summary>Create wathdog script</summary>
-      <comment></comment>
-    </item>
-    <item>
-      <summary>Add buttons script for preset switching</summary>
-      <comment>A buttons script must be added to send a signal which switches preset channels</comment>
+      <summary>Trac</summary>
+      <comment>For open issues, see http://www.jcoderz.org/m3dditiez/report</comment>
     </item>
   </category>
 </gtodo>

@@ -1,4 +1,15 @@
-0.1
-===
+0.1.3
+=====
+
+#3 	Daemonize the m3player
+#4 	Make the name of the UPnP device configurable
+#5 	Documentation for moving the m3player onto the TL-WR1043ND
+#6 	Implement a method for switching between MediaRenderer V1 and V2
+#7 	Add WLAN configuration to the image build
+#10 Allow GUPnP to be bound to a specific network interface
+#19 Change copyright to jCoderZ.org
+
+0.1.2
+=====
 
 Initial release.
