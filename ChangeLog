@@ -1,54 +1,180 @@
+2011-08-19 22:40  mrumpf
+
+	* ., src, src/m3player.c: Fixed location where XML files are loaded
+	  from
+
+2011-08-19 22:33  mrumpf
+
+	* README: Describe the difference between MediaRenderer V1 and V2
+	  specs.
+
+2011-08-19 22:19  mrumpf
+
+	* src/m3player.c, src/run.sh: #4 Copy the files and do a filtering
+	  upon startup
+
+2011-08-19 20:54  mrumpf
+
+	* src/MediaRendererV1.xml, src/MediaRendererV2.xml,
+	  src/avtransport.c, src/connectionmanager.c,
+	  src/connectionmanager.h, src/gstreamer.c, src/gstreamer.h,
+	  src/last_change.c, src/last_change.h, src/presets.c,
+	  src/presets.h, src/renderingcontrol.c, src/renderingcontrol.h:
+	  #19 Changed copyright to jCoderZ.org
+
+2011-08-17 21:19  mrumpf
+
+	* src/AVTransportV1.xml, src/AVTransportV2.xml,
+	  src/MediaRendererV1.xml, src/MediaRendererV2.xml, src/m3player.c:
+	  #6 Switching is done by the name of the root file. When the root
+	  filename contains V1 then the devices with :1 are configured
+
+2011-08-11 23:38  mrumpf
+
+	* src/m3player.c: #10 Added parameter to specify the network
+	  interface
+
+2011-08-11 19:34  mrumpf
+
+	* src/m3player.c, src/run.sh: #3 Cleanup of the daemon code
+
+2011-08-10 23:19  mrumpf
+
+	* src/m3player.c: #3: cleanup
+
+2011-08-10 22:46  mrumpf
+
+	* src/m3player.c, src/run.sh: #3: Started daemonizing the plyer
+
+2011-07-31 23:44  mrumpf
+
+	* src/Makefile.am: Fixed config dir
+
+2011-07-31 23:24  mrumpf
+
+	* src/buttons, src/m3player.c: Fixed buttons script
+
+2011-07-31 22:52  mrumpf
+
+	* ChangeLog, TODO.tasks, src/Makefile.am, src/buttons,
+	  src/m3player.c: Fixed XML structure
+
+2011-07-31 20:17  mrumpf
+
+	* src/avtransport.c, src/gstreamer.c, src/m3player.c: Use the 3
+	  GStreamer plugins instead of the playbin: souphttpsrc, mad,
+	  alsasink
+
+2011-07-30 22:55  mrumpf
+
+	* src/m3player.c: Added more debug output
+
+2011-07-30 21:57  mrumpf
+
+	* src/presets.c: Fixed segfaults
+
+2011-07-30 21:51  mrumpf
+
+	* src/preset.last, src/presets.list: Removed old files
+
+2011-07-30 21:50  mrumpf
+
+	* src/MediaRendererV1.xml, src/MediaRendererV2.xml,
+	  src/avtransport.c, src/avtransport.h, src/m3player.c,
+	  src/preset.last: Various fixes
+
+2011-07-30 12:05  mrumpf
+
+	* src/Makefile.am: Include the m3player.ini file in the
+	  distribution
+
+2011-07-30 11:26  mrumpf
+
+	* src/m3player.c: Fixed compile error
+
+2011-07-30 11:19  mrumpf
+
+	* src/MediaRendererV1.xml, src/MediaRendererV2.xml, src/m3player.c,
+	  src/m3player.ini, src/preset.last, src/presets.c, src/presets.h:
+	  Added command line parameter handling
+
+2011-07-29 23:38  mrumpf
+
+	* src/Makefile.am: Do not use the var folder
+
+2011-07-29 23:21  mrumpf
+
+	* src/AVTransportV1.xml, src/AVTransportV2.xml,
+	  src/ConnectionManagerV1.xml, src/ConnectionManagerV2.xml,
+	  src/MediaRendererV1.xml, src/MediaRendererV2.xml,
+	  src/RenderingControlV1.xml, src/RenderingControlV2.xml,
+	  src/description1.xml, src/description2.xml: Renamed XML files
+
+2011-07-29 22:50  mrumpf
+
+	* src/m3ddity-player.c, src/m3player.c: renamed main file
+
+2011-07-27 19:30  mrumpf
+
+	* Makefile.am, configure.ac, src/Makefile.am, src/presets.c: Fixed
+	  Makefile.am
+
+2011-07-26 22:05  mrumpf
+
+	* Makefile.am, configure.ac, src/AVTransport,
+	  src/ConnectionManager, src/Makefile.am, src/RenderingControl:
+	  cleanup of Makefile
+
 2011-07-25 22:50  mrumpf
 
-	* [r59] TODO.tasks: Added items
+	* TODO.tasks: Added items
 
 2011-07-24 22:05  mrumpf
 
-	* [r55] src/last_change.c, src/last_change.h: Fixed compile error
-	  under OpenWRT
+	* src/last_change.c, src/last_change.h: Fixed compile error under
+	  OpenWRT
 
 2011-07-24 21:54  mrumpf
 
-	* [r53] src/m3ddity-player.c: Added include to make the code
-	  compile under OpenWRT
+	* src/m3ddity-player.c: Added include to make the code compile
+	  under OpenWRT
 
 2011-07-24 13:15  mrumpf
 
-	* [r46] Makefile.am, src/Makefile.am, src/Makefile.in[DEL]: Make
-	  the program installable
+	* Makefile.am, src/Makefile.am, src/Makefile.in: Make the program
+	  installable
 
 2011-07-24 12:49  mrumpf
 
-	* [r41] gupnp-audio-renderer.anjuta[DEL], m3ddity-player.anjuta:
+	* gupnp-audio-renderer.anjuta, m3ddity-player.anjuta: Fixed name
+
+2011-07-24 12:49  mrumpf
+
+	* src/Makefile.in, src/audio-renderer.c, src/m3ddity-player.c:
 	  Fixed name
-
-2011-07-24 12:49  mrumpf
-
-	* [r40] src/Makefile.in, src/audio-renderer.c[DEL],
-	  src/m3ddity-player.c: Fixed name
 
 2011-07-24 12:48  mrumpf
 
-	* [r39] configure.ac, src/Makefile.am, src/audio-renderer.c,
-	  src/run.sh: Fixed name
+	* configure.ac, src/Makefile.am, src/audio-renderer.c, src/run.sh:
+	  Fixed name
 
 2011-07-24 09:15  mrumpf
 
-	* [r19] .[CPY]: Renamed player project
+	* .: Renamed player project
 
 2011-07-17 16:26  mrumpf
 
-	* [r7] Ignore generated files
+	* Ignore generated files
 
 2011-07-17 16:00  mrumpf
 
-	* [r6]
+	* 
 
 2011-07-17 16:00  mrumpf
 
-	* [r5] Moved stuff, accidentally imported into the wrong folder.
+	* Moved stuff, accidentally imported into the wrong folder.
 
 2011-07-17 15:58  mrumpf
 
-	* [r4] Added project folder
+	* Added project folder
 
