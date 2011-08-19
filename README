@@ -7,3 +7,24 @@ GUPnP Audio Renderer
 UBICOM DLNA WiFi Speakers:
 http://www.ubicom.com/applications/dlnaspeakers.php
 
+
+
+
+Difference between MediaRendererV1 and MediaRendererV2:
+===========================================================
+
+V1:
+i4 AbsoluteCounterPosition
+
+V2:
+ui4 AbsoluteCounterPosition
+
+New StateVariables
+  CurrentMediaCategory
+  DRMState
+
+New Actions
+  SetStateVariables
+  GetStateVariables
+  GetDRMState
+  GetMediaInfo_Ext
