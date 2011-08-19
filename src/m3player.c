@@ -113,7 +113,7 @@ gupnp_init (const gchar* fileName, const gchar *xmlFolder) {
     }
     g_debug ("Running on port %d", gupnp_context_get_port (context));
 
-    g_debug ("Create root device");
+    g_debug ("Create root device (%s/%s)", xmlFolder, fileName);
     dev = gupnp_root_device_new (context, fileName, xmlFolder);
 
     char devInfo[256];
@@ -278,6 +278,10 @@ handleParameters(int argc, char **argv) {
 
     if (logFile == NULL) {
         logFile = LOG_FILE_DEFAULT;
+    }
+
+    if (interface == NULL) {
+        interface = NULL; // TODO: How to find the LAN interfaces
     }
 
     if (!hostName) {
@@ -505,7 +509,7 @@ main (int argc, char **argv) {
     g_debug ("Initializing gstreamer sub-system...");
     gstreamer_init (main_loop);
 
-    rc = gupnp_init (rootFile, xmlSource);
+    rc = gupnp_init (rootFile, xmlTarget);
     if (rc != 0) {
         g_printerr ("GUPnP initialization failed!");
         return rc;
