@@ -7,8 +7,8 @@
   <!-- URLBase>http://localhost</URLBase -->
   <device>
     <deviceType>urn:schemas-upnp-org:device:MediaRenderer:2</deviceType>
-    <friendlyName>m3ddity player - m3player</friendlyName>
-    <manufacturer>jCoderZ</manufacturer>
+    <friendlyName>@HOSTNAME@</friendlyName>
+    <manufacturer>jCoderZ.org</manufacturer>
     <manufacturerURL>http://www.jcoderz.org/m3dditiez/</manufacturerURL>
     <modelName>m3player</modelName>
     <modelNumber>@VERSION@</modelNumber>
