@@ -31,11 +31,11 @@ make && make install
 cd ..
 
 
-git clone http://git.gnome.org/browse/gupnp-tools
-cd gupnp-tools
-PKG_CONFIG_PATH=${DIR}/install/lib/pkgconfig ./autogen.sh --prefix=${DIR}/install --exec-prefix=${DIR}/install
-make && make install
-cd ..
+#git clone http://git.gnome.org/browse/gupnp-tools
+#cd gupnp-tools
+#PKG_CONFIG_PATH=${DIR}/install/lib/pkgconfig ./autogen.sh --prefix=${DIR}/install --exec-prefix=${DIR}/install
+#make && make install
+#cd ..
 
 
 cd ..

@@ -13,6 +13,7 @@ Prerequisites
 ================================================================================
 * GCC 4.x
 * gtk-doc-tools (gtkdocize)
+* uuid uuid-dev uuid-runtime
 
 
 Compile
