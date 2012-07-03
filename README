@@ -15,6 +15,17 @@ Prerequisites
 * gtk-doc-tools (gtkdocize)
 
 
+Compile
+================================================================================
+Just run the build.sh script like this:
+
+. ./build.sh
+
+The you can run the m3player with the following command:
+
+cd src
+./run.sh
+
 
 Compatibility with Controllers
 ================================================================================
